@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="connect">
+
+	<select id="connectHistDataAdminList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  SEQ 
+  			, USER_ID
+  			, IP
+  			, PARAMETER
+  			, CONECT_DT
+  			, CONECT_CD
+  			, CRUD
+  			, IF(BBS_CD IS NULL, '', BBS_CD) AS BBS_CD
+  			, DATE_FORMAT(REGIST_DT, '%Y.%m.%d') AS REGIST_DT_DAY
+  			, DATE_FORMAT(REGIST_DT, '%H:%i:%s') AS REGIST_DT_TIME
+  			, REGIST_ID
+  			, (SELECT IF(B.MENU_NM IS NULL, '', B.MENU_NM) FROM MENU_MASTR B WHERE B.MENU_ID = A.MENU_ID) AS MENU_NM
+  			, (SELECT IF(C.SEQ IS NULL, '', C.SEQ) FROM GNRL_BBS C WHERE C.SEQ = A.VIEW_SEQ) AS VIEW_SEQ
+		FROM
+			CONECT_HIST A
+		WHERE SESSION_ID IS NOT NULL AND SESSION_ID != ''
+		<if test='sdtp != "" and sdtp != null'>
+			<![CDATA[AND DATE_FORMAT(REGIST_DT,'%Y-%m-%d') >= DATE_FORMAT(#{sdtp},'%Y-%m-%d')]]>
+		</if>
+		<if test='edtp != "" and edtp != null'>
+			<![CDATA[AND DATE_FORMAT(REGIST_DT,'%Y-%m-%d') <= DATE_FORMAT(#{edtp},'%Y-%m-%d')]]>
+		</if>
+		GROUP BY SESSION_ID
+		ORDER BY REGIST_DT DESC
+		<if test="recordCountPerPage != null and firstIndex != null">
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select>	
+	
+	<select id="connectHistDataAdminCnt" parameterType="zvl" resultType="int">
+		SELECT COUNT(A.USER_ID)
+		FROM (
+			SELECT USER_ID, COUNT(USER_ID) 
+			FROM
+				CONECT_HIST
+				WHERE SESSION_ID IS NOT NULL AND SESSION_ID != ''
+				<if test='sdtp != "" and sdtp != null'>
+					<![CDATA[AND DATE_FORMAT(REGIST_DT,'%Y-%m-%d') >= DATE_FORMAT(#{sdtp},'%Y-%m-%d')]]>
+				</if>
+				<if test='edtp != "" and edtp != null'>
+					<![CDATA[AND DATE_FORMAT(REGIST_DT,'%Y-%m-%d') <= DATE_FORMAT(#{edtp},'%Y-%m-%d')]]>
+				</if>
+				GROUP BY SESSION_ID
+		) AS A
+	</select>	
+		
+	<select id="connectHistDataAdminListView" parameterType="zvl" resultType="zvl">
+		SELECT
+		      CRUD
+		    , (SELECT IF(B.URL IS NULL, '', B.URL) FROM MENU_MASTR B WHERE B.MENU_ID = A.MENU_ID) AS URL
+  			, (SELECT IF(B.MENU_NM IS NULL, '', B.MENU_NM) FROM MENU_MASTR B WHERE B.MENU_ID = A.MENU_ID) AS MENU_NM
+  			, (SELECT IF(C.SEQ IS NULL, '', C.SEQ) FROM GNRL_BBS C WHERE C.SEQ = A.VIEW_SEQ) AS VIEW_SEQ
+  			, BBS_CD
+  			, DATE_FORMAT(REGIST_DT, '%Y.%m.%d %H:%i:%s') AS REGIST_DT
+  	 	FROM CONECT_HIST A
+  	 	WHERE SESSION_ID = 
+  	 		(SELECT
+				SESSION_ID
+			 FROM
+			 	CONECT_HIST
+			 WHERE SEQ = #{seq})
+	    ORDER BY REGIST_DT DESC			 
+	</select>
+	
+	<select id="getConnectHistDataAdminMenuId" parameterType="zvl" resultType="string">
+		SELECT
+		      MAX(MENU_ID)
+  	 	 FROM MENU_MASTR 
+  	 	WHERE URL = #{url}	 
+  	 	  AND 1=1
+	</select>	
+			
+</mapper>

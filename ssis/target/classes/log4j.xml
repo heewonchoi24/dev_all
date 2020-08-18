@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+ Log4j Configuration
+
+ * author robin
+ * version $Revision: 1.2 $
+ * create 2007. 4. 4.
+ * since 1.0
+ * last $Date: 2007/12/09 08:14:09 $
+
+ * Reference : http://wiki.apache.org/logging-log4j/Log4jXmlFormat
+-->
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!--
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p %d %c %x - %m%n"/>
+		</layout>
+	</appender>
+	 -->
+
+	<appender name="dailyrolling" class="org.apache.log4j.ExtDailyRollingFileAppender">
+		<param name="threshold" value="debug"/>
+		<param name="datePattern" value=".yyyy-MM-dd"/>
+		<!-- <param name="file" value="${inisafe.framework.home}/logs/inisafe_framework_agent.log"/>  -->
+		<param name="file" value="/app/logs/safedb_file.log"/>
+		<param name="append" value="true"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- param name="ConversionPattern" value="=%d{ABSOLUTE} - %p %c - %m%n"/-->
+			<!--<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5p] (%F:%L) %m%n"/>-->
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] - %-5p %c{1}:%L %m%n"/>
+		</layout>
+	</appender>
+
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		<param name="threshold" value="debug"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- param name="ConversionPattern" value="%5p [%t] (%F:%L)- %m%n"/-->
+			<!--<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5p] (%F:%L) %m%n"/>-->
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] - %-5p %c{1}:%L %m%n"/>
+		</layout>
+	</appender>
+
+	<root>
+		<priority value="info" />
+		<appender-ref ref="stdout" />
+		<appender-ref ref="dailyrolling" />
+	</root>
+
+</log4j:configuration>

@@ -1,0 +1,72 @@
+<div id="changeDateCal">
+    <div class="inner">
+        <header class="pop_header"><h1>배송패턴 변경 (1/2)</h1></header>
+        <div class="pop_content">
+            <input type="hidden" class="startDate">
+            <input type="hidden" class="endDate">
+            <div class="tip_scheduler"><span><i></i></span><p>변경을 원하는 패턴을 선택해주세요.</p></div>
+            <div class="pop_select_items">                            
+                <ul>
+                    <li>
+                        <div class="img"><a href="http://sample.oktomato.net/eatsslim/pctmp/goods_view.html"><img src="dist/images/thumb_sample.jpg" alt=""></a></div>
+                        <div class="desc">
+                            <div class="title"><a href="http://sample.oktomato.net/eatsslim/pctmp/goods_view.html">[헬씨퀴진]</a></div>
+                            <div class="d_period"><span>월 ~ 금</span>17.12.23 ~ 18.01.21</div>
+                            <div class="d_destination">
+                                서울시 오목로 180 평화빌딩 3층
+                                서울시 오목로 180 평화빌딩 3층
+                                서울시 오목로 180 평화빌딩 3층
+                            </div>
+                        </div>
+                    </li>                                        
+                </ul>
+            </div>
+            <div class="bx_pattern">
+                <div class="bx_pattern_inner">
+                    <table>
+                        <tr>
+                            <th>패턴선택</th>
+                            <td>
+                               <div class="bx_check">
+                                   <input type="checkbox" id="pattr_mon">
+                                   <label for="pattr_mon">월</label>
+                                   <input type="checkbox" id="pattr_tue">
+                                   <label for="pattr_tue">화</label>
+                                   <input type="checkbox" id="pattr_wed">
+                                   <label for="pattr_wed">수</label>
+                                   <input type="checkbox" id="pattr_thu">
+                                   <label for="pattr_thu">목</label>
+                                   <input type="checkbox" id="pattr_fri">
+                                   <label for="pattr_fri">금</label>
+                               </div> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>수량선택</th>
+                            <td>
+                               <div class="bx_check">
+                                   <select name="" id="" class="inp_st">
+                                       <option value="1">1</option>
+                                       <option value="2">2</option>
+                                   </select>
+                               </div> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>패턴시작일</th>
+                            <td>
+                                <div class="bx_check">
+                                    <input type="text" class="inp_st"  id="pattr_startDate">
+                                    <button type="button" class="btn_chooseDate" onclick="calendarPop.addCont({url : 'ajax/__ajax_calendar_changepatternCal.html', direc : 'down'})">패턴시작일 선택버튼</button>
+                               </div> 
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="bottom_btn_area">
+                <button type="button" class="btn btn_dgray huge square" onclick="calendarPop.addCont({url : 'ajax/__ajax_calendar_changepattern2.html'})">선택완료</button>
+            </div>
+        </div>
+    </div>
+</div>

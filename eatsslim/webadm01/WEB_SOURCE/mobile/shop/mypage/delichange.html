@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="euc-kr">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<title>잇슬림</title>
+    <!--[if gte IE 9]>
+     <style type="text/css">
+      .gradient {
+       filter: none;
+       }
+      </style>
+     <![endif]-->
+    <link rel="stylesheet" type="text/css" media="all" href="../../common/css/eatsslim-ui.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="../../common/css/style.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="../../common/css/jquery.lightbox.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="../../common/css/jquery-ui.css" />
+    <script type="text/javascript" src="../../common/js/jquery.js"></script>
+    <script type="text/javascript" src="../../common/js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../../common/js/jquery.cycle.js"></script>
+	<script type="text/javascript" src="../../common/js/eatsslim.js"></script>
+    <script type="text/javascript" src="../../common/js/jquery.lightbox.js"></script>
+</head>
+<body>
+<div id="wrap">
+    <div class="ui-header ui-shadow" style="overflow:hidden;">
+        <a class="ui-btn-left ui-btn allmenu lightbox" href="../../popup/allmenu.html?lightbox[iframe]=true&lightbox[width]=300&lightbox[height]=400"></a>
+        <h1 class="ui-title"><a href="../../index.html"></a></h1>
+        <a class="ui-btn-right ui-btn mypage" href="index.html"></a>
+        <a class="ui-btn-right ui-btn cart" href="../cart.html">
+        <div class="push">2</div>
+        </a>
+        <div class="ui-navbar ui-bar-a">
+            <ul class="ui-grid-d">
+                <li class="ui-block-a">
+                    <a id="home" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../../index.html">
+                        <span class="ui-btn-inner">
+                            <span class="ui-btn-text">메인</span>
+                            <span class="ui-icon ui-icon-custom"></span>
+                        </span>
+                    </a>
+                </li>
+                <li class="ui-block-b">
+                    <a id="order" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../../customer/service.html">
+                        <span class="ui-btn-inner">
+                            <span class="ui-btn-text">주문안내</span>
+                            <span class="ui-icon ui-icon-custom"></span>
+                        </span>
+                    </a>
+                </li>
+                <li class="ui-block-c">
+                    <a id="shop" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../dietMeal.html">
+                        <span class="ui-btn-inner">
+                            <span class="ui-btn-text">SHOP</span>
+                            <span class="ui-icon ui-icon-custom"></span>
+                        </span>
+                    </a>
+                </li>
+                <li class="ui-block-d">
+                    <a id="event" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../../event/">
+                        <span class="ui-btn-inner">
+                            <span class="ui-btn-text">이벤트</span>
+                            <span class="ui-icon ui-icon-custom"></span>
+                        </span>
+                    </a>
+                </li>
+                <li class="ui-block-e">
+                    <a id="delivery" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../../delivery/delivery.html">
+                        <span class="ui-btn-inner">
+                            <span class="ui-btn-text">배송지역</span>
+                            <span class="ui-icon ui-icon-custom"></span>
+                        </span>
+                    </a>
+                </li>
+               <div class="clear"></div>
+            </ul>
+        </div>
+        <!-- End ui-navbar -->
+    </div>
+    <!-- End ui-header -->
+    <!-- Start Content -->
+    <div id="content">
+        <h1 class="ui-bar-a"><span class="ui-btn-inner"><span class="ui-btn-text">주문배송조회</span></span></h1>
+        <ul class="form-line">
+            <li>
+              <div class="select-box">
+                <select>
+                  <option value="1">1개월</option>
+                  <option value="2">2개월</option>
+                </select>
+              </div>
+              <div class="clear"></div>
+            </li>
+         </ul>
+         <ul class="guide">
+             <li>* 최근 3개월 이후 주문내역은 웹에서 조회하실 수 있습니다.</li>
+             <li>* 기타 관련문의는 고객센터(080-022-0085)로 연락바랍니다.</li>
+         </ul>
+         <div class="grid-navi">
+             <table class="navi" border="0" cellspacing="10" cellpadding="0">
+               <tr>
+                 <td><a href="orderList.html" class="ui-btn ui-btn-inline ui-btn-up-f-line"><span class="ui-btn-inner"><span class="ui-btn-text">주문조회</span></span></a></td>
+                 <td><a href="delichange.html" class="ui-btn ui-btn-inline ui-btn-up-f"><span class="ui-btn-inner"><span class="ui-btn-text">주문취소조회</span></span><span class="active"></span></a></td>
+               </tr>
+            </table>
+        </div>
+        <div class="divider"></div>
+        <ul class="itemlist bg-gray">
+            <li>
+                <a href="#">
+                <p class="title">[일배]주문번호 A2154856184845</p>
+                <span class="date">2013.10.03</span>
+                <p>다이어트식사 3식/1개(외0건)</p>
+                <p>총결제금액: <span class="won">100,900원<b>[취소완료]</b></span></p>
+                </a>
+            </li>
+        </ul>
+        <ul class="guide">
+             <li>* 교환/반품/배송지변경 요청은 PC웹에서 신청가능합니다.</li>
+         </ul>
+    </div>
+    <!-- End Content -->
+    <div class="ui-footer">
+        <div class="marb10">
+            <a href="login.html" class="ui-btn ui-mini ui-btn-inline ui-btn-up-c"><span class="ui-btn-inner"><span class="ui-btn-text">로그인</span></span></a>
+            <a href="#" class="ui-btn ui-mini ui-btn-inline ui-btn-up-c"><span class="ui-btn-inner"><span class="ui-btn-text">PC버전보기</span></span></a>
+            <a href="../../customer/notice.html" class="ui-btn ui-mini ui-btn-inline ui-btn-up-c"><span class="ui-btn-inner"><span class="ui-btn-text">고객센터</span></span></a>
+        </div>
+        <p>풀무원 건강생활(주) 서울 강남구 수서동 724번지 2층<br />대표이사:유창하 ㅣ 개인정보관리책임자:장종의</p>
+        <p class="copyright">&copy; 2013 PULMUONE HEALTH&LIVING Co., Ltd.</p>
+    </div>
+</div>
+<script src="../../common/js/idangerous.swiper-2.1.min.js"></script>
+    <script>
+	  var mySwiper = new Swiper('.swiper-container',{
+		pagination: '.pagination',
+		loop:true,
+		grabCursor: true,
+		paginationClickable: true
+	  })
+	  $('.arrow-left').on('click', function(e){
+		e.preventDefault()
+		mySwiper.swipePrev()
+	  })
+	  $('.arrow-right').on('click', function(e){
+		e.preventDefault()
+		mySwiper.swipeNext()
+	  })
+	</script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="msg">
+	
+	<select id="listThread" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+	
+		SELECT * FROM (
+		SELECT
+			@ROWNUM:=@ROWNUM+1 ROWNUM,	
+			X.SEQ			AS SEQ,
+			X.SUBJECT		AS SUBJECT,
+			<![CDATA[REPLACE(X.CONTENTS, '\n', '<br />') CONTENTS,]]>
+			X.ATCHMNFL_ID   AS ATCHMNFL_ID,
+			( SELECT COUNT(1) FROM NOTIFICATION_MSSAGE_DETAIL AS Y WHERE Y.SEQ = X.SEQ ) AS TRNSMIT_CNT,
+			( SELECT Z.USER_NM FROM NOTIFICATION_MSSAGE_DETAIL AS Y, USER_MASTR Z 
+       		  WHERE  Y.SEQ = X.SEQ AND Y.USER_ID=Z.USER_ID 
+        	  AND    Y.DETAIL_SEQ=(SELECT MIN(DETAIL_SEQ) FROM NOTIFICATION_MSSAGE_DETAIL A WHERE A.SEQ = X.SEQ ) ) AS TRNSMIT_NM, 	
+        	X.RECPTN_YN	AS RECPTN_YN,	
+			DATE_FORMAT(X.RECPTN_DT, '%Y.%m.%d %H:%i:%s') AS RECPTN_DT,
+			DATE_FORMAT(X.REGIST_DT, '%Y.%m.%d') AS REGIST_DT,
+			X.REGIST_ID		AS REGIST_ID,
+			X.REGIST_ID		AS REGIST_NM,
+			DATE_FORMAT(X.UPDT_DT, '%Y.%m.%d') 	AS UPDT_DT,
+			X.UPDT_ID		AS UPDT_ID,
+			X.UPDT_ID		AS UPDT_NM
+		FROM
+			NOTIFICATION_MSSAGE	AS X
+		WHERE
+			X.DELETE_YN = 'N'
+		AND	X.USER_ID   = #{user_id}
+		<if test='searchSub != null and searchSub != ""'>
+		AND	X.SUBJECT   like #{searchSub}
+		</if>
+		<if test='searchCon != null and searchCon != ""'>
+		AND	X.CONTENTS  like #{searchCon}
+		</if>
+		<if test='searchAll != null and searchAll != ""'>
+		AND	X.SUBJECT   like #{searchAll}
+		AND	X.CONTENTS  like #{searchAll}
+		</if>
+		ORDER BY X.SEQ
+		) A ORDER BY A.ROWNUM DESC
+		<if test="recordCountPerPage != null and firstIndex != null">
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select>
+
+	<select id="tmsgOneThread" parameterType="zvl" resultType="zvl">
+		SELECT
+			SEQ, 
+			USER_ID, 
+			SUBJECT, 
+			<![CDATA[REPLACE(CONTENTS, '\n', '<br />') CONTENTS,]]>
+			ATCHMNFL_ID,
+			RECPTN_YN, 
+			DATE_FORMAT(RECPTN_DT, '%Y.%m.%d') AS T_RECPTN_DT, 
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d %H:%i:%s') AS T_REGIST_DT, 
+			REGIST_ID, 
+			DATE_FORMAT(UPDT_DT, '%Y.%m.%d') AS UPDT_DT,
+			UPDT_ID, 
+			DATE_FORMAT(DELETE_DT, '%Y.%m.%d') AS DELETE_DT,
+			DELETE_ID, 
+			DELETE_YN 
+		FROM
+			NOTIFICATION_MSSAGE
+		WHERE
+			SEQ     = #{threadSeq}
+		AND	USER_ID = #{user_id}			
+	</select> 
+
+	<select id="listTransmit" parameterType="zvl" resultType="zvl">
+		SELECT
+		      Y.DETAIL_SEQ,
+			  Z.USER_NM,
+			  ( SELECT INSTT_NM FROM INSTITUTION_MASTR AS A WHERE Z.INSTT_CD = A.INSTT_CD ) AS INSTT_NM,  
+			  Z.RSPOFC,
+			  Y.RECPTN_YN,
+			  DATE_FORMAT(Y.RECPTN_DT, '%Y.%m.%d %H:%i:%s') AS RECPTN_DT
+		FROM
+			NOTIFICATION_MSSAGE	AS X, NOTIFICATION_MSSAGE_DETAIL AS Y, USER_MASTR Z 
+		WHERE
+ 			X.SEQ     = Y.SEQ  
+		AND Y.USER_ID = Z.USER_ID 
+		AND	X.USER_ID = #{user_id}
+		AND X.SEQ     = #{threadSeq}
+		ORDER BY Y.DETAIL_SEQ
+	</select>
+
+	<select id="listDetailThread" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+		SELECT * FROM (
+		SELECT
+			@ROWNUM:=@ROWNUM+1 ROWNUM,	
+			X.SEQ			AS SEQ,
+			X.SUBJECT		AS SUBJECT,
+			<![CDATA[REPLACE(X.CONTENTS, '\n', '<br />') CONTENTS,]]>
+			X.ATCHMNFL_ID   AS ATCHMNFL_ID,
+			( SELECT Z.USER_NM FROM USER_MASTR AS Z 
+       		  WHERE  X.USER_ID=Z.USER_ID ) AS TRNSMIT_NM, 	
+       		Y.RECPTN_YN	AS RECPTN_YN,		
+			DATE_FORMAT(Y.REGIST_DT, '%Y.%m.%d %H:%i:%s') AS REGIST_DT,
+			X.REGIST_ID		AS REGIST_ID,
+			Y.REGIST_ID		AS REGIST_NM,
+			DATE_FORMAT(X.UPDT_DT, '%Y.%m.%d') 	AS UPDT_DT,
+			Y.UPDT_ID		AS UPDT_ID,
+			Y.UPDT_ID		AS UPDT_NM,
+			Y.USER_ID
+		FROM
+			NOTIFICATION_MSSAGE	AS X, NOTIFICATION_MSSAGE_DETAIL Y
+		WHERE
+			Y.DELETE_YN = 'N'
+		AND	X.SEQ       = Y.SEQ
+		AND	Y.USER_ID   = #{user_id}	
+		<if test='searchSub != null and searchSub != ""'>
+		AND	X.SUBJECT   like #{searchSub}
+		</if>
+		<if test='searchCon != null and searchCon != ""'>
+		AND	X.CONTENTS  like #{searchCon}
+		</if>
+		<if test='searchAll != null and searchAll != ""'>
+		AND	X.SUBJECT   like #{searchAll}
+		AND	X.CONTENTS  like #{searchAll}
+		</if>			
+		ORDER BY Y.SEQ
+		) A ORDER BY A.ROWNUM DESC
+		<if test="recordCountPerPage != null and firstIndex != null">
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select>	
+
+	<select id="rmsgOneThread" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.SEQ, 
+			B.DETAIL_SEQ, 
+			A.USER_ID, 
+		    ( SELECT Z.USER_NM FROM USER_MASTR AS Z 
+       		  WHERE  A.USER_ID=Z.USER_ID ) AS TRNSMIT_NM, 
+			( SELECT Z.INSTT_CD FROM USER_MASTR AS Z 
+       		  WHERE  A.USER_ID=Z.USER_ID ) AS INSTT_CD, 	
+			( SELECT A.INSTT_CL_CD FROM USER_MASTR Z , INSTITUTION_MASTR A 
+       		  WHERE  A.USER_ID=Z.USER_ID 
+        	  AND    Z.INSTT_CD = A.INSTT_CD) AS INSTT_CL_CD,
+        	( SELECT INSTT_NM FROM USER_MASTR Z, INSTITUTION_MASTR A 
+       		  WHERE  A.USER_ID=Z.USER_ID AND Z.INSTT_CD = A.INSTT_CD) AS INSTT_NM, 	 
+    		( SELECT Z.CODE_NM FROM CMMN_CD_MASTR Z
+			  WHERE Z.DELETE_YN = 'N' AND Z.UPPER_CD = 'IC00' AND Z.CODE = INSTT_CL_CD) AS INSTT_CL_NM,	      		  
+			A.SUBJECT, 
+			<![CDATA[REPLACE(CONTENTS, '\n', '<br />') CONTENTS,]]>
+			A.ATCHMNFL_ID AS ATCHMNFL_ID,
+			A.RECPTN_YN   AS T_RECPTN_YN,
+			DATE_FORMAT(A.RECPTN_DT, '%Y.%m.%d') AS T_RECPTN_DT, 
+			DATE_FORMAT(A.REGIST_DT, '%Y.%m.%d %H:%i:%s') AS T_REGIST_DT, 
+			DATE_FORMAT(B.REGIST_DT, '%Y.%m.%d %H:%i:%s') AS R_REGIST_DT, 
+			A.REGIST_ID, 
+			DATE_FORMAT(B.UPDT_DT, '%Y.%m.%d') AS UPDT_DT,
+			A.UPDT_ID, 
+			DATE_FORMAT(B.DELETE_DT, '%Y.%m.%d') AS DELETE_DT,
+			B.DELETE_ID, 
+			B.DELETE_YN,
+			B.RECPTN_YN  AS R_RECPTN_YN, 
+			DATE_FORMAT(B.RECPTN_DT, '%Y.%m.%d') AS R_RECPTN_DT 
+		FROM
+			NOTIFICATION_MSSAGE A, NOTIFICATION_MSSAGE_DETAIL B
+		WHERE
+			A.SEQ = B.SEQ
+		AND	A.SEQ = #{threadSeq}
+		AND	B.USER_ID = #{user_id}		
+	</select> 
+	
+	<select id="cntThread" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(SEQ)
+		FROM
+			NOTIFICATION_MSSAGE
+		WHERE
+			USER_ID   = #{user_id}
+		AND DELETE_YN = 'N'
+		<if test='searchSub != null and searchSub != ""'>
+		AND	SUBJECT   like #{searchSub}
+		</if>
+		<if test='searchCon != null and searchCon != ""'>
+		AND	CONTENTS  like #{searchCon}
+		</if>
+		<if test='searchAll != null and searchAll != ""'>
+		AND	SUBJECT   like #{searchAll}
+		AND	CONTENTS  like #{searchAll}
+		</if>
+	</select>
+
+	<select id="cntDetailThread" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(Y.SEQ)
+		FROM
+			NOTIFICATION_MSSAGE X, NOTIFICATION_MSSAGE_DETAIL Y
+		WHERE
+		    X.SEQ = Y.SEQ
+		AND	Y.USER_ID   = #{user_id}
+		AND Y.DELETE_YN = 'N'
+		<if test='searchSub != null and searchSub != ""'>
+		AND	X.SUBJECT   like #{searchSub}
+		</if>
+		<if test='searchCon != null and searchCon != ""'>
+		AND	X.CONTENTS  like #{searchCon}
+		</if>
+		<if test='searchAll != null and searchAll != ""'>
+		AND	X.SUBJECT   like #{searchAll}
+		AND	X.CONTENTS  like #{searchAll}
+		</if>
+		
+	</select>
+	
+	<select id="detailThread" parameterType="zvl" resultType="zvl">
+		SELECT
+			SEQ, 
+			SUBJECT, 
+			<![CDATA[REPLACE(CONTENTS, '\n', '<br />') CONTENTS,]]>
+			ATCHMNFL_ID, 
+			READ_CO, 
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d') AS REGIST_DT, 
+			REGIST_ID, 
+			DATE_FORMAT(UPDT_DT, '%Y.%m.%d') AS UPDT_DT,
+			UPDT_ID, 
+			DATE_FORMAT(DELETE_DT, '%Y.%m.%d') AS DELETE_DT,
+			DELETE_ID, 
+			DELETE_YN
+		FROM
+			NOTIFICATION_MSSAGE
+		WHERE
+			SEQ = #{threadSeq}
+	</select> 
+	
+	<insert id="registThread" parameterType="zvl">
+		INSERT INTO NOTIFICATION_MSSAGE
+		(
+			USER_ID,
+			SUBJECT,
+			CONTENTS,
+			<if test='atchmnfl_id != null and atchmnfl_id != ""'>
+			ATCHMNFL_ID,
+			</if>
+			RECPTN_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		VALUES
+		(
+			#{regist_id},
+			#{subject},
+			#{contents},
+			<if test='atchmnfl_id != null and atchmnfl_id != ""'>
+			#{atchmnfl_id},
+			</if>
+			'N',
+			now(),
+			#{regist_id},
+			'N'
+		);
+		<selectKey keyProperty="seq" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+
+		<if test="file_ids != null and file_ids.length > 0">
+			INSERT ATTACHMENT_FILE_MAP ( ATCHMNFL_ID, FILE_ID, TABLE_NM, TABLE_ID, REGIST_DT, REGIST_ID, DELETE_YN  )
+			SELECT  #{atchmnfl_id}, FILE_ID, 'NOTIFICATION_MSSAGE', LAST_INSERT_ID(), NOW(), #{regist_id}, 'N'
+			FROM    ATTACHMENT_FILE_MASTR
+			WHERE   FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+			AND		1=1;
+		</if>
+		
+	</insert>
+
+	<insert id="registDetailThread" parameterType="zvl">
+		INSERT INTO NOTIFICATION_MSSAGE_DETAIL
+		(
+		    SEQ,
+			USER_ID,
+			RECPTN_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		VALUES
+		(
+			#{threadSeq},
+			#{detail_id},
+			'N',
+			now(),
+			#{regist_id},
+			'N'
+		);
+		<selectKey keyProperty="detailSeq" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+				
+	</insert>
+
+	<update id="deleteTrnsmitMsg" parameterType="zvl">
+		UPDATE NOTIFICATION_MSSAGE SET
+			DELETE_DT	= now(),
+			DELETE_ID	= #{user_id},
+			DELETE_YN   = 'Y'
+		WHERE
+			SEQ			= #{threadSeq}
+		AND	USER_ID	    = #{user_id};
+	</update>
+
+	<update id="deleteReceiveMsg" parameterType="zvl">
+		UPDATE NOTIFICATION_MSSAGE_DETAIL SET
+			DELETE_DT	= now(),
+			DELETE_ID	= #{user_id},
+			DELETE_YN   = 'Y'
+		WHERE
+			SEQ			= #{threadSeq}
+		AND	USER_ID	    = #{user_id};
+	</update>
+
+	<update id="updateTrnsmitMsg" parameterType="zvl">
+		UPDATE NOTIFICATION_MSSAGE SET
+			RECPTN_DT	= now(),
+			RECPTN_YN   = 'Y',
+			UPDT_DT	    = now(),
+			UPDT_ID     = #{user_id}
+		WHERE
+			SEQ			= #{threadSeq};
+	</update>
+
+	<update id="updateReceiveMsg" parameterType="zvl">
+		UPDATE NOTIFICATION_MSSAGE_DETAIL SET
+			RECPTN_DT	= now(),
+			RECPTN_YN   = 'Y',
+			UPDT_DT	    = now(),
+			UPDT_ID     = #{user_id}
+		WHERE
+			SEQ			= #{threadSeq}
+		AND	USER_ID	    = #{user_id};
+	</update>
+
+	<select id="cntReceiveCheck" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(SEQ)
+		FROM
+			NOTIFICATION_MSSAGE_DETAIL
+		WHERE
+			SEQ		   = #{threadSeq}
+		AND	(RECPTN_YN != 'Y' OR RECPTN_YN is NULL)
+	</select>
+
+	<select id="msgInsttList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{instt_cl_cd}
+		</if>
+		<if test='instt_nm != null and instt_nm != ""'>
+			AND A.INSTT_CD = #{instt_nm}
+		</if>		
+	</select>
+
+	<select id="msgInsttClCdList" parameterType="zvl" resultType="zvl">
+		SELECT DISTINCT
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+		WHERE
+			A.DELETE_YN = 'N'
+			ORDER BY A.INSTT_CL_CD
+	</select>
+
+	<select id="msgInsttSelectList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{instt_cl_cd}
+		</if>	
+		ORDER BY INSTT_CD
+	</select>
+
+	<select id="msgInsttUserList" parameterType="zvl" resultType="zvl">
+		SELECT
+		    X.USER_ID,
+		    X.USER_NM,
+		    X.RSPOFC,
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			USER_MASTR X ,
+			INSTITUTION_MASTR A
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE X.INSTT_CD = A.INSTT_CD
+			AND A.DELETE_YN = 'N'
+			AND X.CONFM_YN='Y'	
+			AND X.USER_ID !=#{user_id}
+		<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{instt_cl_cd}
+		</if>	
+		<if test='instt_cd != null and instt_cd != ""'>
+			AND A.INSTT_CD=#{instt_cd}	
+		</if>
+		ORDER BY INSTT_CD
+	</select>
+
+	<select id="msgFileList" parameterType="zvl" resultType="zvl">
+		SELECT 
+		    A.SEQ,
+			C.FILE_ID,
+			C.FILE_NAME,
+			C.SAVE_FILE_NAME,
+			C.FILE_PATH,
+			SUBSTRING(C.FILE_EXTSN,1,3) FILE_EXTSN
+		FROM 
+			NOTIFICATION_MSSAGE A,
+			ATTACHMENT_FILE_MAP B, 
+			ATTACHMENT_FILE_MASTR C 
+		WHERE 
+		1=1 
+			AND A.SEQ  = #{threadSeq}
+			AND A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			AND B.FILE_ID = C.FILE_ID
+	</select>
+
+	<delete id="deleteMsgFile" parameterType="zvl">
+		DELETE
+		FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{fileId}
+	</delete>
+	
+		
+	<select id="msgRPrev" parameterType="zvl" resultType="zvl">
+		SELECT 
+				Y.SEQ,
+				X.SUBJECT,
+				Y.USER_ID
+			FROM NOTIFICATION_MSSAGE X, NOTIFICATION_MSSAGE_DETAIL Y 
+			WHERE X.SEQ = Y.SEQ 
+				AND Y.SEQ <![CDATA[<]]> #{threadSeq}
+				AND Y.USER_ID = #{user_id}
+				AND Y.DELETE_YN = 'N'
+			ORDER BY Y.SEQ DESC LIMIT 1
+	</select>
+	
+	<select id="msgRNext" parameterType="zvl" resultType="zvl">
+		SELECT
+				Y.SEQ,
+				X.SUBJECT,
+				Y.USER_ID
+			FROM NOTIFICATION_MSSAGE X, NOTIFICATION_MSSAGE_DETAIL Y 
+			WHERE X.SEQ = Y.SEQ 
+				AND Y.SEQ <![CDATA[>]]> #{threadSeq}
+				AND Y.USER_ID = #{user_id}
+				AND Y.DELETE_YN = 'N'
+			ORDER BY Y.SEQ LIMIT 1
+	</select>
+	
+	<select id="msgTPrev" parameterType="zvl" resultType="zvl">
+		SELECT 
+				Y.SEQ,
+				X.SUBJECT,
+				Y.USER_ID
+			FROM NOTIFICATION_MSSAGE X, NOTIFICATION_MSSAGE_DETAIL Y 
+			WHERE X.SEQ = Y.SEQ 
+				AND X.SEQ <![CDATA[<]]> #{threadSeq}
+				AND X.USER_ID = #{user_id}
+				AND X.DELETE_YN = 'N'
+			ORDER BY SEQ DESC LIMIT 1
+	</select>
+	
+	<select id="msgTNext" parameterType="zvl" resultType="zvl">
+		SELECT
+				Y.SEQ,
+				X.SUBJECT,
+				Y.USER_ID
+			FROM NOTIFICATION_MSSAGE X, NOTIFICATION_MSSAGE_DETAIL Y 
+			WHERE X.SEQ = Y.SEQ 
+				AND X.SEQ <![CDATA[>]]> #{threadSeq}
+				AND X.USER_ID = #{user_id}
+				AND X.DELETE_YN = 'N'
+			ORDER BY SEQ LIMIT 1
+	</select>
+	
+		
+</mapper>

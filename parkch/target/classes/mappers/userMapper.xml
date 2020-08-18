@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="user">
+
+	<select id="userInfo" parameterType="Login" resultType="Login">
+		SELECT
+			idx idx,
+			u_no userno,
+			u_id userid,
+			u_pw userpw,
+			salt salt,
+			u_nm usernm,	
+			u_telno usertelno,
+			u_email userEmail,
+			u_addr useraddr,
+			agree_yn agreeyn,
+			mem_yn memyn,
+			auth_yn authyn,
+			rec_u_id recuid,
+			u_ip userip,
+			regist_dt registdt
+		FROM 
+			user
+	    WHERE
+	    	u_id = #{userId}
+	</select>
+
+	<select id="userFindId" parameterType="java.util.Map" resultType="Login">
+		SELECT
+			u_id userid
+		FROM 
+			user
+	    WHERE
+	    	u_nm = #{u_nm}
+	      AND
+	        u_telno = #{u_telno}
+	</select>
+		
+	<insert id="insertUser" parameterType="java.util.Map">
+		INSERT INTO user(
+			u_no, 
+			u_id, 
+			u_pw,
+			salt,
+			u_nm, 			
+			u_telno,
+			u_email,
+			u_addr,
+			agree_yn,
+			rec_u_id,
+			u_ip,
+			regist_dt
+		) VALUES (
+			#{u_no},
+			#{u_id},
+			#{u_pw},
+			#{salt},
+			#{u_nm},
+			#{u_telno},
+			#{u_email},
+			#{u_addr},
+			#{agree_yn},
+			#{rec_u_id},
+			#{u_ip},
+			now()
+		)
+	</insert>
+	
+	<select id="cntId" parameterType="java.util.Map" resultType="int">
+		SELECT
+			COUNT(u_id)
+		FROM
+			user
+		WHERE
+			u_id = #{u_id}
+	</select>
+	
+	<update id="updateUser" parameterType="java.util.Map">
+		UPDATE user	SET
+		    u_pw 	 = #{u_pw},
+			salt 	 = #{salt},
+			u_nm 	 = #{u_nm},
+			u_telno  = #{u_telno},
+			u_email  = #{u_email},
+			u_addr 	 = #{u_addr},
+			rec_u_id = #{rec_u_id},
+			agree_yn = #{agree_yn},
+			<if test='mem_yn != "" and mem_yn != null'>
+				mem_yn   = #{mem_yn},
+			</if>
+			<if test='pay_date != "" and pay_date != null'>
+				pay_date = now()
+			</if>			
+		WHERE 
+		 	u_id     = #{u_id}
+	</update>
+	
+	<delete id="deleteUser"  parameterType="java.util.Map">
+		DELETE 
+		  FROM user
+		 WHERE u_id = #{u_id}
+	</delete>
+	
+	<update id="updateUserPassword"  parameterType="java.util.Map">
+		UPDATE user	SET
+		    u_pw 	 = #{u_pw},
+			salt 	 = #{salt}
+		WHERE 
+		 	u_email  = #{u_email}	
+	</update>
+
+</mapper>

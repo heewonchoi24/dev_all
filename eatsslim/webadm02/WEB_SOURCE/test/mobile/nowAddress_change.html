@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=euc-kr" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+	<title>잇슬림</title>
+    <link rel="stylesheet" type="text/css" media="all" href="https://www.eatsslim.co.kr/mobile/common/css/eatsslim-ui.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="https://www.eatsslim.co.kr/mobile/common/css/style.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="https://www.eatsslim.co.kr/mobile/common/css/jquery-ui.css" />
+    <!--link rel="stylesheet" type="text/css" media="all" href="https://www.eatsslim.co.kr/mobile/common/css/jquery.lightbox.css" /-->
+    <link rel="stylesheet" type="text/css" media="all" href="https://www.eatsslim.co.kr/mobile/common/css/colorbox.css" />
+    <script type="text/javascript" src="https://www.eatsslim.co.kr/mobile/common/js/jquery.js"></script>
+    <script type="text/javascript" src="https://www.eatsslim.co.kr/mobile/common/js/jquery-ui.js"></script>	
+    <script type="text/javascript" src="https://www.eatsslim.co.kr/mobile/common/js/jquery.colorbox.js"></script>
+	<script type="text/javascript" src="https://www.eatsslim.co.kr/mobile/common/js/util.js"></script>
+    <script>
+		$(document).ready(function(){
+		$(".iframe").colorbox({iframe:true, width:"96%", height:"405px"});
+		});
+	</script>
+</head>
+<body>
+<div class="pop-wrap">
+	<div class="headpop">
+		<h2>새 배송지 입력</h2>
+        <button id="cboxClose" type="button">close</button>
+		<div class="clear"></div>
+	</div>
+	<div class="contentpop">
+       
+       <div class="row" style="margin-bottom:-10px;">
+       <h3>자동 변환된 도로명 주소입니다.</h3>
+       <p>정확한 배송을 위해 변환된 주소 정보를 확인 해 주세요.</p>
+       </div>
+       <div class="row">
+        <h3>현재주소</h3>
+        <p>133-092 서울특별시 성동구 금호동2가 주공아파트 19-206</p>
+       </div>
+		<div class="row">
+        <h3>도로명 주소</h3>
+			<table class="spectable" width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<th width="60">우편번호</th>
+				  <th>주소</th>
+					<th width="40">선택</th>
+			  </tr>
+			</table>
+		</div>
+        <div class="row">
+            <ul class="form-regist"> 
+              <li>
+                <label>상세주소</label>
+                <span style="display:inline-block; width:76%;">
+                <input name="" type="number" style="width:50px"> <input name="" type="number" style="width:60px">
+                <br />
+                <input name="" type="text" style="width:100%">
+                <br />
+                <input name="" type="text" style="width:100%">
+                </span>
+               </li>
+            </ul>   
+        </div>
+        <div class="row">
+        <div class="grid-navi">
+			<table class="navi" border="0" cellspacing="10" cellpadding="0">
+				<tr>
+					<td><a href="nowAddress.html" class="ui-btn ui-btn-inline ui-btn-up-d"><span class="ui-btn-inner"><span class="ui-btn-text">초기화</span></span></a></td>
+					<td><a href="#" class="ui-btn ui-btn-inline ui-btn-up-b"><span class="ui-btn-inner"><span class="ui-btn-text">확인</span></span></a></td>
+				</tr>
+			</table>
+		</div>
+        </div>
+
+        
+	</div>
+	<!-- End contentpop -->
+</div>
+<script type="text/javascript">
+function moveUrl(url) {
+	parent.location.href = url;
+}
+</script>
+<script type="text/javascript">
+$(document).ready(function() { 
+	$('.ordertabs a').click(function(){
+		switch_tabs($(this));
+	});
+ 
+	switch_tabs($('.defaulttab')); 
+});
+ 
+function switch_tabs(obj) {
+	$('.tab-content').hide();
+	$('.ordertabs a').removeClass("selected");
+	var id = obj.attr("rel");
+ 
+	$('#'+id).show();
+	obj.addClass("selected");
+}
+</script>
+</body>
+</html>

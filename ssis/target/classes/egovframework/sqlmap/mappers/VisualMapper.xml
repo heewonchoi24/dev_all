@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="visual">
+
+ 	<select id="visualList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			SEQ,
+			MODIFIER,
+			TITLE,
+			CONTENT,
+			LINK,
+			IMG_NM,
+			IMG_PATH
+		FROM
+			MAINVISUAL_MASTR
+		ORDER BY SEQ ASC
+	</select>
+	
+	<insert id="visualThreadInsert" parameterType="zvl">
+		INSERT INTO MAINVISUAL_MASTR 
+		(	
+			SEQ,
+			MODIFIER,
+			TITLE,
+			CONTENT,
+			LINK,
+			IMG_NM,
+			IMG_PATH,
+			REGIST_DT,
+			REGIST_ID
+		) 
+		VALUES 
+		( 
+			#{seq},		
+			#{modifier},
+			#{title},
+			#{content},
+			#{link},
+			#{img_nm},
+			#{img_path},
+			NOW(),
+			#{user_id}
+		)
+	</insert>		
+	
+	<update  id="visualThreadUpdate" parameterType="zvl">
+		UPDATE MAINVISUAL_MASTR SET
+			MODIFIER = #{modifier}, 
+			TITLE = #{title}, 
+			CONTENT = #{content},
+			LINK = #{link},
+			IMG_NM = #{img_nm},
+			IMG_PATH = #{img_path},
+			UPDT_DT = NOW(),
+			UPDT_ID = #{user_id}
+		WHERE
+			SEQ = #{seq}
+	</update>		
+	
+	<select id="visualThreadCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			MAINVISUAL_MASTR
+		WHERE 
+			SEQ = #{seq}
+	</select>		
+	
+</mapper>

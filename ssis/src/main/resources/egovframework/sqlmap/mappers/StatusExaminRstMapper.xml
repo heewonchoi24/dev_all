@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="statusExaminRst">
+	
+	<!-- 관리수준 현황조사 결과 START -->
+	<select id="selectStatusExaminRstSummaryList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.INSTT_NM insttNm
+			, A.INSTT_CL_CD insttClCd
+			, C.CODE_NM insttClNm
+			, D.insttClCnt
+			, B.GNRLZ_EVL1 gnrlzEvl1
+			, B.GNRLZ_EVL2 gnrlzEvl2
+			, B.TOT_RESULT_SCORE1 totResultScore1
+			, B.TOT_RESULT_SCORE2 totResultScore2
+			, B.STATUS status
+			, E.CODE_NM statusNm
+			, CASE
+				WHEN  B.UPDT_DT IS NOT NULL THEN DATE_FORMAT(B.UPDT_DT, '%Y.%m.%d')
+				ELSE DATE_FORMAT(B.REGIST_DT, '%Y.%m.%d')
+				END evalDt
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT OUTER JOIN STATUS_EXAMIN_GNRLZ_EVL B
+				ON A.INSTT_CD = B.INSTT_CD AND B.ORDER_NO = #{orderNo}
+			LEFT OUTER JOIN CMMN_CD_MASTR C
+				ON A.INSTT_CL_CD = C.CODE AND C.UPPER_CD = #{insttUpperCd}
+			LEFT OUTER JOIN(
+		          SELECT AA.INSTT_CL_CD, COUNT(*) insttClCnt
+		          FROM INSTITUTION_MASTR AA
+		          			<if test='userId != null and userId != ""'>
+				  			LEFT JOIN INSTT_INSCTR_MAP BB ON AA.INSTT_CD = BB.INSTT_CD
+							</if>
+		          WHERE AA.DELETE_YN = 'N'
+		          	<if test='userId != null and userId != ""'>
+					AND
+						BB.DELETE_YN ='N'
+					AND
+						BB.USER_ID = #{userId}
+					</if>		
+		          GROUP BY AA.INSTT_CL_CD
+		        ) D
+		        ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		    LEFT OUTER JOIN CMMN_CD_MASTR E
+				ON B.STATUS = E.CODE AND E.UPPER_CD = #{evalUpperCd}
+			<if test='userId != null and userId != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP F ON A.INSTT_CD = F.INSTT_CD
+			</if>
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='userId != null and userId != ""'>
+		AND
+			F.DELETE_YN ='N'
+		AND
+			F.USER_ID = #{userId}
+		</if>			
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="selectStatusExaminRstSummary" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.INSTT_NM insttNm
+			, A.INSTT_CL_CD insttClCd
+			, C.CODE_NM insttClNm
+			, D.insttClCnt
+			, B.GNRLZ_EVL1 gnrlzEvl1
+			, B.GNRLZ_EVL2 gnrlzEvl2
+			, B.TOT_RESULT_SCORE1 totResultScore1
+			, B.TOT_RESULT_SCORE2 totResultScore2
+			, B.STATUS status
+			, E.CODE_NM statusNm
+			, CASE
+				WHEN  B.UPDT_ID IS NOT NULL THEN (SELECT USER_NM FROM USER_MASTR WHERE B.UPDT_ID = USER_ID)
+				ELSE (SELECT USER_NM FROM USER_MASTR WHERE B.REGIST_ID = USER_ID)
+				END evalUserNm
+			, CASE
+				WHEN  B.UPDT_DT IS NOT NULL THEN DATE_FORMAT(B.UPDT_DT, '%Y.%m.%d')
+				ELSE DATE_FORMAT(B.REGIST_DT, '%Y.%m.%d')
+				END evalDt
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT OUTER JOIN STATUS_EXAMIN_GNRLZ_EVL B
+				ON A.INSTT_CD = B.INSTT_CD AND B.ORDER_NO = #{orderNo}
+			LEFT OUTER JOIN CMMN_CD_MASTR C
+				ON A.INSTT_CL_CD = C.CODE AND C.UPPER_CD = #{insttUpperCd}
+			LEFT OUTER JOIN(
+		          SELECT INSTT_CL_CD, COUNT(*) insttClCnt
+		          FROM INSTITUTION_MASTR
+		          WHERE DELETE_YN = 'N'
+		          GROUP BY INSTT_CL_CD
+		        ) D
+		        ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		    LEFT OUTER JOIN CMMN_CD_MASTR E
+				ON B.STATUS = E.CODE AND E.UPPER_CD = #{evalUpperCd}
+		WHERE
+			A.DELETE_YN = 'N'
+		AND
+			A.INSTT_CD = #{insttCd}
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="selectStatusExaminRstSummaryFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, C.FILE_ID fileId
+			, C.FILE_NAME fileName
+			, C.SAVE_FILE_NAME saveFileName
+			, C.FILE_PATH filePath,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			STATUS_EXAMIN_GNRLZ_EVL A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			A.INSTT_CD = #{insttCd}
+		AND
+			A.ORDER_NO = #{orderNo}
+	</select>
+	
+	<select id="selectStatusExaminRstList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INDEX_SEQ indexSeq
+			, A.ORDER_NO orderNo
+			, A.LCLAS lclas
+			, A.LCLAS_ORDER lclasOrder
+      		, B.lclasCnt
+			, A.MLSFC mlsfc
+			, A.MLSFC_ORDER mlsfcOrder
+      		, C.mlsfcCnt
+			, A.SCLAS sclas
+			, A.SCLAS_ORDER sclasOrder
+			, D.sclasCnt
+			, A.CHECK_ITEM checkItem
+			, A.HELP_COMMENT helpComment
+			, A.REMARK remark
+			, A.RESULT_SE resultSe
+			, A.EXCP_PERM_YN excpPermYn
+			, A.REGIST_DT registDt
+			, A.REGIST_ID registId
+			, A.UPDT_DT updtDt
+			, A.UPDT_ID updtId
+			, A.DELETE_DT deleteDt
+			, A.DELETE_ID deleteId
+			, A.DELETE_YN deleteYn
+			, E.RESULT_SCORE1 resultScore1
+			, E.RESULT_SCORE2 resultScore2
+			, E.STATUS status
+			, E.EVL_OPINION evlOpinion
+			, CASE
+				WHEN  E.UPDT_DT IS NOT NULL THEN DATE_FORMAT(E.UPDT_DT, '%Y.%m.%d')
+				ELSE DATE_FORMAT(E.REGIST_DT, '%Y.%m.%d')
+				END evalDt
+		FROM
+			STATUS_EXAMIN_IDX A 
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, COUNT(*) lclasCnt
+		          FROM STATUS_EXAMIN_IDX
+		          GROUP BY ORDER_NO, LCLAS
+		        ) B
+		        ON A.ORDER_NO = B.ORDER_NO AND A.LCLAS = B.LCLAS
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, COUNT(*) mlsfcCnt
+		          FROM STATUS_EXAMIN_IDX
+		          GROUP BY ORDER_NO, LCLAS, MLSFC
+		        ) C
+		        ON A.ORDER_NO = C.ORDER_NO AND A.LCLAS = C.LCLAS AND A.MLSFC = C.MLSFC
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, SCLAS, COUNT(*) sclasCnt
+		          FROM STATUS_EXAMIN_IDX
+		          GROUP BY ORDER_NO, LCLAS, MLSFC, SCLAS
+		        ) D
+		        ON A.ORDER_NO = D.ORDER_NO AND A.LCLAS = D.LCLAS AND A.MLSFC = D.MLSFC AND A.SCLAS = D.SCLAS
+				LEFT OUTER JOIN STATUS_EXAMIN_EVL E
+				ON E.INSTT_CD = #{insttCd} AND A.INDEX_SEQ = E.INDEX_SEQ
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.SCLAS_ORDER, A.INDEX_SEQ
+	</select>
+	
+	<select id="selectStatusExaminRstDtlAllList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.INDEX_SEQ indexSeq
+			, A.INDEX_DETAIL_SEQ indexDetailSeq
+			, A.RESULT_SCORE1 resultScore1
+			, A.RESULT_SCORE2 resultScore2
+			, A.MEMO memo
+			, A.EVL_OPINION evlOpinion
+			, A.REGIST_DT registDt
+			, A.REGIST_ID registId
+			, A.UPDT_DT updtDt
+			, A.UPDT_ID updtId
+			, A.DELETE_DT deleteDt
+			, A.DELETE_ID deleteId
+			, A.DELETE_YN deleteYn
+		FROM
+			STATUS_EXAMIN_EVL_DETAIL A 
+		WHERE
+			A.INSTT_CD = #{insttCd}
+		ORDER BY A.INDEX_SEQ, A.INDEX_DETAIL_SEQ
+	</select>
+	
+	<select id="selectStatusExaminRst" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.INDEX_SEQ indexSeq,
+			A.ORDER_NO orderNo,
+			A.LCLAS lclas,
+			A.LCLAS_ORDER lclasOrder,
+			A.MLSFC mlsfc,
+			A.MLSFC_ORDER mlsfcOrder,
+			A.SCLAS sclas,
+			A.SCLAS_ORDER sclasOrder,
+			A.CHECK_ITEM checkItem,
+			A.HELP_COMMENT helpComment,
+			A.REMARK remark,
+			A.RESULT_SE resultSe,
+			A.EXCP_PERM_YN excpPermYn,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn,
+      		B.ATCHMNFL_ID atchmnflId,
+			B.RESULT_SCORE1 resultScore1,
+			B.RESULT_SCORE2 resultScore2,
+			B.STATUS status,
+			B.MEMO memo,
+			B.EVL_OPINION evlOpinion,
+			B.FOBJCT_RESN fobjctResn,
+			B.FOBJCT_DE fobjctDe,
+			B.FOBJCT_ATCHMNFL_ID fobjctAtchmnflId
+		FROM
+			STATUS_EXAMIN_IDX A 
+      			LEFT JOIN STATUS_EXAMIN_EVL B ON B.INSTT_CD = #{insttCd} AND A.INDEX_SEQ = B.INDEX_SEQ
+		WHERE
+			A.ORDER_NO = #{orderNo}
+    	AND
+      		A.INDEX_SEQ = #{indexSeq}
+	</select>
+	
+	<select id="selectStatusExaminRstDtlList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.RESULT_SCORE1 resultScore1
+			, A.RESULT_SCORE2 resultScore2
+			, A.MEMO memo
+			, A.EVL_OPINION evlOpinion
+			, A.REGIST_DT registDt
+			, A.REGIST_ID registId
+			, A.UPDT_DT updtDt
+			, A.UPDT_ID updtId
+			, A.DELETE_DT deleteDt
+			, A.DELETE_ID deleteId
+			, A.DELETE_YN deleteYn
+			, B.INDEX_SEQ indexSeq
+			, B.INDEX_DETAIL_SEQ indexDetailSeq
+			, B.CHECK_ITEM checkItem
+		FROM
+			STATUS_EXAMIN_IDX_DETAIL B
+				LEFT OUTER JOIN STATUS_EXAMIN_EVL_DETAIL A
+				ON A.INDEX_SEQ = B.INDEX_SEQ AND A.INDEX_DETAIL_SEQ = B.INDEX_DETAIL_SEQ AND A.INSTT_CD = #{insttCd} 
+		WHERE
+			B.INDEX_SEQ = #{indexSeq}
+		ORDER BY B.INDEX_SEQ, B.INDEX_DETAIL_SEQ
+	</select>
+	
+	<select id="selectStatusExaminRstFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.MNG_LEVEL_IDX_SEQ indexSeq
+			, C.FILE_ID fileId
+			, C.FILE_NAME fileName
+			, C.SAVE_FILE_NAME saveFileName
+			, C.FILE_PATH filePath,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			MANAGE_LEVEL_REQST A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			EXISTS (
+				SELECT 1
+				FROM
+					STATUS_EXAMIN_IDX
+				WHERE
+					INDEX_SEQ = #{indexSeq}
+				AND
+					A.MNG_LEVEL_IDX_SEQ =  MNG_LEVEL_INDEX_SEQ
+			)
+			AND A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<select id="selectStatusExaminEvlMemoFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INDEX_SEQ indexSeq
+			, A.ATCHMNFL_ID atchmnflId
+			, C.FILE_ID fileId
+			, C.FILE_NAME fileName
+			, C.SAVE_FILE_NAME saveFileName
+			, C.FILE_PATH filePath
+			, C.MIME_TYPE mimeType,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			STATUS_EXAMIN_EVL A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			1=1 
+			AND A.INDEX_SEQ = #{indexSeq}
+			AND A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<select id="selectStatusExaminEvlFobjctFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INDEX_SEQ indexSeq
+			, A.FOBJCT_ATCHMNFL_ID fobjctAtchmnflId
+			, C.FILE_ID fileId
+			, C.FILE_NAME fileName
+			, C.SAVE_FILE_NAME saveFileName
+			, C.FILE_PATH filePath
+			, C.MIME_TYPE mimeType,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			STATUS_EXAMIN_EVL A
+			JOIN ATTACHMENT_FILE_MAP B ON A.FOBJCT_ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			1=1 
+			AND A.INDEX_SEQ = #{indexSeq}
+			AND A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<update  id="updateStatusExaminRstFobjct" parameterType="zvl">
+		UPDATE STATUS_EXAMIN_EVL SET
+			STATUS = 'ES03',
+			FOBJCT_RESN = #{fobjctResn},
+			FOBJCT_DE = DATE_FORMAT(NOW(), '%Y%m%d'), 
+			UPDT_ID = #{updateId},
+			UPDT_DT = NOW()
+		WHERE
+			INSTT_CD = #{insttCd}
+			AND INDEX_SEQ = #{indexSeq}
+	</update>
+	
+	<update  id="updateStatusExaminEvlFobjctFile" parameterType="zvl">
+		UPDATE STATUS_EXAMIN_EVL SET
+			STATUS = 'ES03',
+			FOBJCT_ATCHMNFL_ID = #{atchmnflId},
+			FOBJCT_RESN = #{fobjctResn},
+			FOBJCT_DE = DATE_FORMAT(NOW(), '%Y%m%d'), 
+			UPDT_ID = #{updateId},
+			UPDT_DT = NOW()
+		WHERE
+			INSTT_CD = #{insttCd}
+			AND INDEX_SEQ = #{indexSeq};
+		  
+		<if test='file_ids != null and file_ids != ""'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnflId}, 
+				FILE_ID, 
+				'STATUS_EXAMIN_EVL', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{registId}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+	</update>
+	
+	<select id="selectAttachmentFileMapCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnflId}
+	</select>
+	
+	<delete id="deletefile" parameterType="zvl">
+		DELETE FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{fileId};
+
+		DELETE FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnflId}
+			AND FILE_ID = #{fileId}
+	</delete>
+	
+	<update id="deleteStatusExaminEvlFobjctFile" parameterType="zvl">
+		UPDATE STATUS_EXAMIN_EVL SET
+			FOBJCT_ATCHMNFL_ID = NULL
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			INDEX_SEQ = #{indexSeq}
+	</update>
+	
+	<select id="selectStatusExaminRstDtlSum" parameterType="zvl" resultType="zvl">
+		SELECT 
+			COUNT(*) sumCnt, RESULT_SCORE2 resultScore2
+		FROM
+			STATUS_EXAMIN_EVL_DETAIL
+		WHERE
+			INSTT_CD = #{insttCd}
+		GROUP BY RESULT_SCORE2
+	</select>
+	
+	<select id="selectStatusExaminExcelDtlList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			  A.ORDER_NO orderNo
+			, A.LCLAS lclas
+			, A.MLSFC mlsfc
+			, A.SCLAS sclas
+			, A.CHECK_ITEM checkItem
+			, B.CHECK_ITEM dtlCheckItem
+	      	, C.RESULT_SCORE1 resultScore1
+	      	, C.RESULT_SCORE2 resultScore2
+	      	, C.EVL_OPINION evlOpinion
+	      	, C.MEMO memo
+	      	, D.RESULT_SCORE1 dtlResultScore1
+	      	, D.RESULT_SCORE2 dtlResultScore2
+		FROM
+			STATUS_EXAMIN_IDX A
+		        LEFT OUTER JOIN STATUS_EXAMIN_IDX_DETAIL B
+		        ON A.INDEX_SEQ = B.INDEX_SEQ
+		        LEFT OUTER JOIN STATUS_EXAMIN_EVL C
+		        ON A.INDEX_SEQ = C.INDEX_SEQ
+		        AND C.INSTT_CD = #{insttCd}
+            	LEFT OUTER JOIN STATUS_EXAMIN_EVL_DETAIL D
+            	ON A.INDEX_SEQ = D.INDEX_SEQ
+            	AND B.INDEX_DETAIL_SEQ = D.INDEX_DETAIL_SEQ
+            	AND D.INSTT_CD = #{insttCd}
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.SCLAS_ORDER, A.INDEX_SEQ, B.INDEX_DETAIL_SEQ
+	</select>
+	<!-- 관리수준 현황조사 결과 END -->
+</mapper>

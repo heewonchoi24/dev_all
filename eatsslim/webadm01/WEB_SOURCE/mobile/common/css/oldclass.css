@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+.oldClass { font-size: 1.5em; line-height: 1.5; font-weight: 300; }
+.oldClass h3, .oldClass h4 { font-weight: 500; }
+
+.oldClass .grid-navi { margin: 0; width: 100%; }
+.oldClass table.navi td .ui-btn-inline { display: block; width: 100%; margin: 0; border: 0;  box-sizing: border-box; color: #333; position: relative; margin-bottom: 1em !important; }
+.oldClass table.navi td .ui-btn-up-f { background-color: #fff; color: #298cb6; }
+.oldClass table.navi td .ui-btn-up-f:after { content: ''; position: absolute; width: 100%; height: 2px; left: 0; bottom: 0; background-color: #5fbae1; }
+.oldClass table.navi td .ui-btn-inline.ui-btn-up-f .active { background: url(../../images/navi_active.png) no-repeat -15px 0; }
+.oldClass .grid-navi .ui-btn-inner,
+.oldClass .ui-listview .ui-btn-inner { font-size: 16px; padding: .8em 12px; min-width: .75em; display: block; position: relative; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; zoom: 1; box-sizing: border-box; line-height: 1.2;background:white; }
+
+.oldClass .contentpop { padding: 0; height: 100%; }

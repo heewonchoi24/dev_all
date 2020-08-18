@@ -1,0 +1,208 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>풀무원 잇슬림</title>
+
+<link href="css/main_style.css" rel="stylesheet" />
+<!-- bxSlider CSS file css파일 불러오는게 script보다 위쪽에 있어야함-->
+<link href="css/jquery.bxslider.css" rel="stylesheet" />
+<!-- jQuery library (served from Google) -->
+<script src="js/jquery-1.12.4.min.js"></script>
+<!-- bxSlider Javascript file -->
+<script src="js/jquery.bxslider.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#slider1').bxSlider({
+	  mode: 'fade',
+	  auto: true,
+	  autoControls: true,
+	  pause: 2000
+	});
+	
+	$('#slider2').bxSlider({
+	  auto: true,
+	  autoControls: true,
+	  pause: 3000,
+	  slideMargin: 20
+	});
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".menu ul ul").slideUp(0);
+	
+	$(".menu>ul>li").click(function(){
+		$(".menu ul ul").stop().slideUp();
+		$(this).find("ul").slideDown();
+	});
+})
+</script>
+</head>
+
+<body>
+	<div id="wrap">
+		<header>
+			<h1><a href="http://www.eatsslim.co.kr/mobile/index.jsp">잇슬림</a></h1>
+			<nav class="gnb">
+			<h2>전체메뉴보기</h2>
+			<!-- 최상단 메뉴 : 전체메뉴보기 / 로고 / 로그인/ 장바구니 -->
+			</nav>
+			<div class="topmenu">
+			<ul>
+			<li><a href="#">로그인</a></li>
+			<li><a href="#">장바구니</a></li>
+			</ul>
+			</div>
+		<div id="wrap" class="home">
+		<div class="ui-header-fixed ui-shadow" style="overflow:hidden;">
+		</div>
+		</header>
+
+		<main>
+			<article class="main_img">
+				<h2>잇슬림 대표 이미지</h2>
+				<ul id="slider1">
+                    <li><a href="http://www.eatsslim.co.kr/mobile/shop/healthyMeal.jsp"><img src="images/main_img1.jpg" alt="잇슬림 신제품 헬씨퀴진" />
+                    <p class="p1">내 몸을 위한 건강한 한끼,<br /><span class="f1">건강 도시락 "헬씨 퀴진"</span><br /><span class="box">자세히보기 클릭 ></span></p></a></li>
+                    <li><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal.jsp"><img src="images/main_img2.jpg" alt="식사 다이어트" />
+                    <p class="p2">하루 한끼, 두끼, 세끼<br /><span class="f2">원하는 Style로, 원하는 끼니만큼!</span><br ><span class="box">자세히보기 클릭></span></p> </a></li>
+                    <li><a href="http://www.eatsslim.co.kr/mobile/shop/weight2weeks.jsp"><img src="images/main_img3.jpg" alt="다이어트 프로그램" />
+                    <p class="p3">임상영양사가 직접 설계한 맞춤형 다이어트 프로그램!<br /><span class="f3">나에게 딱! 맞는 프로그램!</span><br ><span class="box">자세히보기 클릭></span></p></a></li>
+                    <li><a href="http://www.eatsslim.co.kr/mobile/shop/minimeal.jsp"><img src="images/main_img4.jpg" alt="간편식" />
+                    <p class="p4">가볍지만 맛있고, 든든한 한끼로<br />또는 다이어트 간식으로!<br /><span class="f4">밸런스쉐이크와 잇슬림 미니밀!</span><br ><span class="box">자세히보기 클릭></span></p></a></li>
+
+				</ul>
+			</article>
+
+			<article class="main_task">
+				<h2>자주 찾는 메뉴</h2>
+				<ul>
+				<li class="m1bg m1"><a href="http://www.eatsslim.co.kr/mobile/intro/schedule.jsp"></a><p>이달의 식단</p></li>
+				<li class="m2bg m2"><a href="http://www.eatsslim.co.kr/mobile/shop/mypage/orderList.jsp"></a><p>주문/배송 조회</p></li>
+				<li class="m3bg m3"><a href="http://www.eatsslim.co.kr/mobile/shop/popup/AddressSearchJiPop.jsp?ztype=0003"></a><p>배달 지역 확인</p></li>
+				<li class="m4bg m4"><a href="http://www.eatsslim.co.kr/mobile/customer/service.jsp"></a><p>주문 안내</p></li>
+				<li class="m5bg m5"><a href="http://www.eatsslim.co.kr/mobile/customer/notice.jsp"></a><p>공지사항</p></li>
+				<li class="m6bg m6"><a href="http://www.eatsslim.co.kr/mobile/customer/indiqna.jsp"></a><p>1:1 문의</p></li>
+				</ul>
+			</article>
+
+			<article class="event">
+				<h2>잇슬림 이벤트</h2>
+				<ul id="slider2">
+                    <li><a href="http://www.eatsslim.co.kr/mobile/event/view.jsp?id=238&pgsize=10"><img src="images/event_ban1.jpg" alt="잇슬림이벤트" /></a></li>
+                    <li><a href="http://www.eatsslim.co.kr/mobile/event/view.jsp?id=237&pgsize=10"><img src="images/event_ban2.jpg" alt="잇슬림이벤트" /></a></li>
+                    <li><a href="http://www.eatsslim.co.kr/mobile/event/view.jsp?id=236&pgsize=10"><img src="images/event_ban3.jpg" alt="잇슬림이벤트" /></a></li>
+				</ul>
+			</article>
+
+			<section class="menu">
+				<h2>제품 상세보기/주문하기</h2>
+				<ul>
+					<li><a href="http://www.eatsslim.co.kr/mobile/shop/healthyMeal.jsp">건강 도시락</a>
+                        <ul>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/healthyMeal.jsp">헬씨퀴진</a>
+                           		 <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/goods/healthyCuisine.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/healthyMeal-order.jsp">주문하기</a></div>
+                            </li>
+                        </ul>
+                    </li>
+                    
+					<li><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal.jsp">식사 다이어트</a>
+                        <ul>
+                            <li><a href="#">퀴진</a>						
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/goods/cuisine.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-alacarteA.jsp">알라까르떼 슬림</a>
+                            	<div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-alacarteA.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-alacarteB.jsp">알라까르떼 헬씨</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-alacarteB.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/dietMeal-order.jsp">주문하기</a></div>
+                            </li>
+						</ul>
+                    </li>
+
+					<li><a href="http://www.eatsslim.co.kr/mobile/shop/weight2weeks.jsp">프로그램 다이어트</a>
+                        <ul>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/weight3days.jsp">3일 프로그램</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/weight3days.jsp">상세보기</a><a href="#">주문하기</a></div>
+                            </li>
+                            <li><a href="#">6일 프로그램</a>
+                                <div class="btn"><a href="#">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/weight3days-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/weight2weeks.jsp">집중감량 2주</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/weight2weeks.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/weight2weeks-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/fullStep.jsp">감량유지 4주</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/fullStep.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/dietProgram-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/cleanseProgram.jsp">클렌즈 프로그램</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/cleanseProgram.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/cleanseProgram-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/smartgram.jsp">스마트그램</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/smartgram.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/smartgram-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/speed4weeks.jsp">스피드 프로그램</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/speed4weeks.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/speed4weeks-order.jsp">주문하기</a></div>
+                            </li>
+                        </ul>
+                     </li>
+
+					<li><a href="http://www.eatsslim.co.kr/mobile/shop/minimeal.jsp">간편식</a>
+                        <ul>
+                    	    <li><a href="http://www.eatsslim.co.kr/mobile/shop/minimeal.jsp">잇슬림 미니밀</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/minimeal.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/minimeal-order.jsp">주문하기</a></div>
+                        	</li>
+                        	<li><a href="http://www.eatsslim.co.kr/mobile/shop/balanceShake.jsp">밸런스 쉐이크</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/balanceShake.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/balanceShake-order.jsp">주문하기</a></div>
+                        	</li>
+                        	
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/secretSoup.jsp">시크릿 수프</a>
+                               <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/secretSoup.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/dietSoup-order.jsp">주문하기</a></div>
+                        	</li>
+                        </ul>
+                    </li>
+
+					<li><a href="#">건강기능식품</a>
+                        <ul>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/dietCLA.jsp">다이어트 CLA</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/dietCLA.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/dietCLA-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/digest.jsp">다이제스트</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/digest.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/digest-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/womanBalance.jsp">우먼밸런스</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/womanBalance.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/womanBalance-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/lock.jsp">쾌락</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/lock.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/lock-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/vitaminD.jsp">칼슘비타민D</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/vitaminD.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/vitaminD-order.jsp">주문하기</a></div>
+                            </li>
+                            <li><a href="http://www.eatsslim.co.kr/mobile/shop/chewable.jsp">베리뷰티츄어블</a>
+                                <div class="btn"><a href="http://www.eatsslim.co.kr/mobile/shop/chewable.jsp">상세보기</a><a href="http://www.eatsslim.co.kr/mobile/shop/chewable-order.jsp">주문하기</a></div>
+                            </li>
+                        </ul>
+                      </li>
+                   </ul>
+			</section>
+		</main>
+	</div>
+
+	<footer>
+		<h2>사이트 이용안내</h2>
+		<div class="footer_cont">
+			<div class="footer_link">
+				<ul>
+				<li><a href="#">로그인</a></li>
+				<li><a href="#">PC버전 보기</a></li>
+				<li><a href="#">Facebook</a></li>
+				</ul>
+			</div>
+			<address>풀무원 건강생활(주) 서울 강남구 수서동 724번지 2층</address>
+			<p>대표이사: 여익현 | 사업자등록번호 : 120-85-32517 | 통신판매업신고번호: 강남 02555호 | Tel.080-800-0434 | 개인정보관리책임자: 김헌득<br />© 2013 PULMUONE HEALTH&LIVING Co., Ltd.</p>
+		</div>
+	</footer>
+</body>
+</html>

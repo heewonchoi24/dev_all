@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mngLevelReq">
+	
+	<select id="mngLevelInsttList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			INSTITUTION_MASTR A
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+		</if>
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				<if test='s_instt_cl_cd != null and s_instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{s_instt_cl_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			AND B.DELETE_YN ='N'
+			AND B.USER_ID = #{user_id}
+		</if>
+		<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{instt_cl_cd}
+		</if>
+		<if test='s_instt_cl_cd != null and s_instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{s_instt_cl_cd}
+		</if>
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="mngLevelInsttSelectList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			INSTITUTION_MASTR A
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+		</if>
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='s_instt_cl_cd != null and s_instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{s_instt_cl_cd}
+				</if>
+				<if test='s_instt_cd != null and s_instt_cd != ""'>
+					AND A.INSTT_CD = #{s_instt_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			AND B.DELETE_YN ='N'
+			AND B.USER_ID = #{user_id}
+		</if>
+		<if test='s_instt_cl_cd != null and s_instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{s_instt_cl_cd}
+		</if>
+		ORDER BY A.OUTPUT_ORDR	
+	</select>
+	
+	<select id="mngLevelInsttTableList" parameterType="zvl" resultType="zvl">
+		SELECT
+			LV,
+			INSTT_CD,
+			INSTT_NM,
+			DCNT
+		FROM
+		(
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'1' LV,
+					A.INSTT_CL_CD INSTT_CD,
+					C.CODE_NM INSTT_NM,
+					COUNT(A.INSTT_CD) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					A.INSTT_CL_CD,
+					C.CODE_NM
+			) A
+			UNION ALL
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'2' LV,
+					A.INSTT_CD,
+					A.INSTT_NM,
+					COUNT(A.INSTT_CD) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					A.INSTT_CD,
+					A.INSTT_NM
+			) B
+		)A
+	</select>
+	
+	
+	<select id="mngLevelInsttEvlOrderList" parameterType="zvl" resultType="zvl">
+		SELECT DISTINCT
+			ORDER_NO
+		FROM
+			MNG_LEVEL_IDX_MASTR
+	</select>
+	
+	<select id="mngLevelInsttClCdList" parameterType="zvl" resultType="zvl">
+		SELECT DISTINCT
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM
+		FROM 
+			INSTITUTION_MASTR A
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+		</if>
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			AND B.DELETE_YN ='N'
+			AND B.USER_ID = #{user_id}
+		</if>
+	</select>
+	
+	<select id="mngLevelIdxList" parameterType="zvl" resultType="zvl">
+		SELECT
+			LV,
+			ORDER_NO,
+			IDX,
+			CONTENTS,
+			DCNT
+		FROM
+		(
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'1' LV,
+					ORDER_NO,
+					LCLAS_ORDER IDX,
+					LCLAS CONTENTS,
+					COUNT(*) DCNT
+				FROM 
+					MNG_LEVEL_IDX_MASTR
+				WHERE
+					1=1
+					AND ORDER_NO = #{s_order_no}
+				GROUP BY
+					LCLAS_ORDER
+				ORDER BY 
+					LCLAS_ORDER ASC
+			) A
+			UNION ALL
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'2' LV,
+					ORDER_NO,
+					/* MLSFC_ORDER IDX, */
+					CONCAT(LCLAS_ORDER, '.', MLSFC_ORDER) IDX,
+					MLSFC CONTENTS,
+					COUNT(*) DCNT
+				FROM 
+					MNG_LEVEL_IDX_MASTR
+				WHERE
+					1=1
+					AND ORDER_NO = #{s_order_no}
+				GROUP BY
+					CONCAT(LCLAS_ORDER, '.', MLSFC_ORDER)
+				ORDER BY 
+					LCLAS_ORDER ASC, MLSFC_ORDER ASC
+			) B 
+			UNION ALL
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'3' LV,
+					ORDER_NO,
+					/* CONCAT(MLSFC_ORDER, '.', CHECK_ITEM_ORDER) IDX, */
+					CONCAT(LCLAS_ORDER, '.', MLSFC_ORDER, '.', CHECK_ITEM_ORDER) IDX,
+					CHECK_ITEM CONTENTS,
+					COUNT(*) DCNT
+				FROM 
+					MNG_LEVEL_IDX_MASTR
+				WHERE
+					1=1
+					AND ORDER_NO = #{s_order_no}
+				GROUP BY 
+					CONCAT(LCLAS_ORDER, '.', MLSFC_ORDER, '.', CHECK_ITEM_ORDER)
+				ORDER BY 
+					LCLAS_ORDER ASC, MLSFC_ORDER ASC, CHECK_ITEM_ORDER ASC
+			) C
+		) A
+	</select>
+	
+	<select id="mngLevelInsttEvlList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD,
+			A.INSTT_NM,
+			A.INSTT_CL_CD,
+			B.INDEX_SEQ,
+			B.ORDER_NO,
+			B.LCLAS_ORDER,
+			CONCAT(B.LCLAS_ORDER, '.', B.MLSFC_ORDER) MLSFC_ORDER,
+			CONCAT(B.LCLAS_ORDER, '.', B.MLSFC_ORDER, '.', B.CHECK_ITEM_ORDER) CHECK_ITEM_ORDER,
+			C.STATUS,
+			C.RESULT_SCORE1,
+			C.RESULT_SCORE2,
+			C.RESULT_TOT_SCORE1,
+			C.RESULT_TOT_SCORE2,
+			C.RESULT_TOT_PER1,
+			C.RESULT_TOT_PER2,
+			C.FOBJCT_RESN,
+			C.FOBJCT_DE,
+			D.EXCP_PERM_YN
+		FROM
+			INSTITUTION_MASTR A
+			LEFT JOIN MNG_LEVEL_IDX_MASTR B ON B.DELETE_YN = 'N'
+			LEFT JOIN MANAGE_LEVEL_EVL C ON B.INDEX_SEQ = C.INDEX_SEQ AND A.INSTT_CD = C.INSTT_CD AND C.DELETE_YN = 'N'
+			LEFT JOIN MANAGE_LEVEL_REQST D ON B.INDEX_SEQ = D.MNG_LEVEL_IDX_SEQ AND A.INSTT_CD = D.INSTT_CD AND D.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP E ON A.INSTT_CD = E.INSTT_CD
+		</if>
+		WHERE
+			1=1
+			AND B.ORDER_NO = #{s_order_no}
+		<if test='user_id != null and user_id != ""'>
+			AND E.USER_ID = #{user_id}
+		</if>
+		<if test='s_instt_cl_cd != null and s_instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{s_instt_cl_cd}
+		</if>
+		<if test='s_instt_cd != null and s_instt_cd != ""'>
+			AND A.INSTT_CD = #{s_instt_cd}
+		</if>
+	</select>
+
+	<select id="mngLevelInsttDetailList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.INDEX_SEQ, 
+			A.ORDER_NO, 
+			A.LCLAS, 
+			A.LCLAS_ORDER, 
+			A.MLSFC, 
+			A.MLSFC_ORDER, 
+			A.CHECK_ITEM, 
+			A.CHECK_ITEM_ORDER, 
+			A.HELP_COMMENT, 
+			A.REMARK, 
+			A.RESULT_SE, 
+			E.EXCP_PERM_YN,
+			B.ATCHMNFL_ID,
+			B.MEMO,
+			B.EVL_OPINION1,
+			B.INSTT_CD, 
+			FORMAT(B.RESULT_SCORE1, 2) RESULT_SCORE1,
+			FORMAT(B.RESULT_SCORE2, 2) RESULT_SCORE2,
+			B.RESULT_TOT_SCORE1,
+			B.RESULT_TOT_SCORE2,
+			B.RESULT_TOT_PER1,
+			B.RESULT_TOT_PER2,
+			B.EVL_OPINION2,
+			B.FOBJCT_RESN,
+			B.FOBJCT_DE,
+			B.STATUS,
+			C.LCLAS_CNT,
+			D.MLSFC_CNT
+		FROM 
+			MNG_LEVEL_IDX_MASTR A
+			LEFT JOIN MANAGE_LEVEL_EVL B ON A.INDEX_SEQ = B.INDEX_SEQ AND B.INSTT_CD = #{s_instt_cd}
+			LEFT JOIN ( SELECT INDEX_SEQ, COUNT(*) LCLAS_CNT FROM MNG_LEVEL_IDX_MASTR WHERE ORDER_NO = #{s_order_no} GROUP BY LCLAS ) C ON A.INDEX_SEQ = C.INDEX_SEQ 
+			LEFT JOIN ( SELECT INDEX_SEQ, COUNT(*) MLSFC_CNT FROM MNG_LEVEL_IDX_MASTR WHERE ORDER_NO = #{s_order_no} GROUP BY MLSFC ) D ON A.INDEX_SEQ = D.INDEX_SEQ
+			LEFT JOIN MANAGE_LEVEL_REQST E ON A.INDEX_SEQ = E.MNG_LEVEL_IDX_SEQ AND A.ORDER_NO = E.ORDER_NO AND E.INSTT_CD = #{s_instt_cd}
+		WHERE 
+			1=1 
+			AND A.ORDER_NO = #{s_order_no}
+		<if test='s_index_seq != null and s_index_seq != ""'>
+			AND A.INDEX_SEQ = #{s_index_seq}
+		</if>
+		ORDER BY A.LCLAS_ORDER ASC, A.MLSFC_ORDER ASC, A.CHECK_ITEM_ORDER ASC 
+	</select>
+
+	<select id="selectMngLevelResultSummary" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.INSTT_NM insttNm
+			, A.INSTT_CL_CD insttClCd
+			, C.CODE_NM insttClNm
+			, D.insttClCnt
+			, B.GNRLZ_EVL1 gnrlzEvl1
+			, B.GNRLZ_EVL2 gnrlzEvl2
+			, B.TOT_RESULT_SCORE1 totResultScore1
+			, B.TOT_RESULT_SCORE2 totResultScore2
+			, B.STATUS status
+			, E.CODE_NM statusNm
+			, CASE
+				WHEN  B.UPDT_ID IS NOT NULL THEN (SELECT USER_NM FROM USER_MASTR WHERE B.UPDT_ID = USER_ID)
+				ELSE (SELECT USER_NM FROM USER_MASTR WHERE B.REGIST_ID = USER_ID)
+				END evalUserNm
+			, CASE
+				WHEN  B.UPDT_DT IS NOT NULL THEN DATE_FORMAT(B.UPDT_DT, '%Y.%m.%d')
+				ELSE DATE_FORMAT(B.REGIST_DT, '%Y.%m.%d')
+				END evalDt
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT OUTER JOIN MANAGE_LEVEL_GNRLZ_EVL B
+				ON A.INSTT_CD = B.INSTT_CD AND B.ORDER_NO = (SELECT MAX(ORDER_NO) FROM MANAGE_LEVEL_GNRLZ_EVL WHERE INSTT_CD = #{s_instt_cd} AND ORDER_NO <![CDATA[<]]> #{s_order_no})
+			LEFT OUTER JOIN CMMN_CD_MASTR C
+				ON A.INSTT_CL_CD = C.CODE AND C.UPPER_CD = #{insttUpperCd}
+			LEFT OUTER JOIN(
+		          SELECT INSTT_CL_CD, COUNT(*) insttClCnt
+		          FROM INSTITUTION_MASTR
+		          WHERE DELETE_YN = 'N'
+		          GROUP BY INSTT_CL_CD
+		        ) D
+		        ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		    LEFT OUTER JOIN CMMN_CD_MASTR E
+				ON B.STATUS = E.CODE AND E.UPPER_CD = #{evalUpperCd}
+		WHERE
+			A.DELETE_YN = 'N'
+		AND
+			A.INSTT_CD = #{s_instt_cd}
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="selectMngLevelResultList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INDEX_SEQ indexSeq
+			, A.ORDER_NO orderNo
+			, A.LCLAS lclas
+			, A.LCLAS_ORDER lclasOrder
+      		, B.lclasCnt
+			, A.MLSFC mlsfc
+			, A.MLSFC_ORDER mlsfcOrder
+      		, C.mlsfcCnt
+			, A.CHECK_ITEM checkItem
+			, A.HELP_COMMENT helpComment
+			, A.REMARK remark
+			, A.RESULT_SE resultSe
+			, A.EXCP_PERM_YN excpPermYn
+			, A.REGIST_DT registDt
+			, A.REGIST_ID registId
+			, A.UPDT_DT updtDt
+			, A.UPDT_ID updtId
+			, A.DELETE_DT deleteDt
+			, A.DELETE_ID deleteId
+			, A.DELETE_YN deleteYn
+			, D.RESULT_SCORE1 resultScore1
+			, D.RESULT_SCORE2 resultScore2
+			, D.STATUS status
+			, D.EVL_OPINION1 evlOpinion1
+			, D.RESULT_TOT_SCORE1 resultTotScore1
+			, D.RESULT_TOT_SCORE2 resultTotScore2
+			, D.RESULT_TOT_PER1 resultTotPer1
+			, D.RESULT_TOT_PER2 resultTotPer2
+			, D.EVL_OPINION2 evlOpinion2
+			, D.MEMO memo
+			, CASE
+				WHEN  D.UPDT_DT IS NOT NULL THEN DATE_FORMAT(D.UPDT_DT, '%Y.%m.%d')
+				ELSE DATE_FORMAT(D.REGIST_DT, '%Y.%m.%d')
+				END evalDt
+		FROM
+			MNG_LEVEL_IDX_MASTR A 
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, COUNT(*) lclasCnt
+		          FROM MNG_LEVEL_IDX_MASTR
+		          GROUP BY ORDER_NO, LCLAS
+		        ) B
+		        ON A.ORDER_NO = B.ORDER_NO AND A.LCLAS = B.LCLAS
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, COUNT(*) mlsfcCnt
+		          FROM MNG_LEVEL_IDX_MASTR
+		          GROUP BY ORDER_NO, LCLAS, MLSFC
+		        ) C
+		        ON A.ORDER_NO = C.ORDER_NO AND A.LCLAS = C.LCLAS AND A.MLSFC = C.MLSFC
+				LEFT OUTER JOIN MANAGE_LEVEL_EVL D
+				ON D.INSTT_CD = #{s_instt_cd} AND A.INDEX_SEQ = D.INDEX_SEQ
+		WHERE
+			A.ORDER_NO = (SELECT MAX(ORDER_NO) FROM MANAGE_LEVEL_GNRLZ_EVL WHERE INSTT_CD = #{s_instt_cd} AND ORDER_NO <![CDATA[<]]> #{s_order_no})
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.INDEX_SEQ
+	</select>
+
+	<select id="mngLevelInsttTotalEvl" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.INSTT_CD,
+			A.ORDER_NO, 
+			A.GNRLZ_EVL1, 
+			A.GNRLZ_EVL2,
+			A.STATUS,
+			CASE
+				WHEN  A.UPDT_ID IS NOT NULL THEN (SELECT USER_NM FROM USER_MASTR WHERE A.UPDT_ID = USER_ID)
+				ELSE (SELECT USER_NM FROM USER_MASTR WHERE A.REGIST_ID = USER_ID)
+				END evalUserNm,
+			CASE
+				WHEN  A.UPDT_DT IS NOT NULL THEN DATE_FORMAT(A.UPDT_DT, '%Y.%m.%d')
+				ELSE DATE_FORMAT(A.REGIST_DT, '%Y.%m.%d')
+				END evalDt
+		FROM
+			MANAGE_LEVEL_GNRLZ_EVL A
+		WHERE
+			1=1
+		<if test='s_order_no != null and s_order_no != ""'>
+			AND A.ORDER_NO = #{s_order_no}
+		</if>
+		<if test='s_instt_cd != null and s_instt_cd != ""'>
+			AND A.INSTT_CD = #{s_instt_cd}
+		</if>
+	</select>
+
+	<select id="mngLevelInsttDetailEvlFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.MNG_LEVEL_IDX_SEQ INDEX_SEQ,
+			C.FILE_ID,
+			C.FILE_NAME,
+			C.SAVE_FILE_NAME,
+			C.FILE_PATH,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			MANAGE_LEVEL_REQST A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			1=1 
+			AND A.MNG_LEVEL_IDX_SEQ = #{s_index_seq}
+			AND A.INSTT_CD = #{s_instt_cd}
+	</select>
+	
+	<select id="mngLevelInsttDetailMemoFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INDEX_SEQ,
+			A.ATCHMNFL_ID,
+			C.FILE_ID,
+			C.FILE_NAME,
+			C.SAVE_FILE_NAME,
+			C.FILE_PATH,
+			C.MIME_TYPE,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			MANAGE_LEVEL_EVL A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			1=1 
+			AND A.INDEX_SEQ = #{s_index_seq}
+			AND A.INSTT_CD = #{s_instt_cd}
+	</select>
+	
+	<select id="mngLevelEvlCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			MANAGE_LEVEL_EVL
+		WHERE 
+			INSTT_CD = #{instt_cd}
+			AND INDEX_SEQ = #{index_seq}
+	</select>
+	
+	<insert id="mngLevelDocumentEvaluationInsert" parameterType="zvl">
+		INSERT INTO MANAGE_LEVEL_EVL
+		(
+			INSTT_CD, 
+			INDEX_SEQ,
+			<choose>
+				<when test='periodCode.contains("B")'>
+					RESULT_SCORE1,
+					RESULT_SCORE2,
+					STATUS,
+					EVL_OPINION1,
+					EVL_OPINION2,
+				</when>
+				<when test='periodCode.contains("D")'>
+					RESULT_SCORE2,
+					STATUS,
+					EVL_OPINION2,
+				</when>
+			</choose>
+			MEMO,
+			ATCHMNFL_ID,
+			REGIST_DT, 
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{instt_cd},
+			#{index_seq},
+			<choose>
+				<when test='periodCode.contains("B")'>
+					<choose>
+						<when test='excpPermYn == "Y"'>
+							NULL,
+							NULL,
+							NULL,
+						</when>
+						<otherwise>
+							#{result_score},
+							#{result_score},
+							'ES01',
+						</otherwise>
+					</choose>
+					#{evl_opinion},
+					#{evl_opinion},
+				</when>
+				<when test='periodCode.contains("D")'>
+					<choose>
+						<when test='excpPermYn == "Y"'>
+							NULL,
+							NULL,
+						</when>
+						<otherwise>
+							#{result_score},
+							'ES04',
+						</otherwise>
+					</choose>
+					#{evl_opinion},
+				</when>
+			</choose>
+			#{memo},
+			#{atchmnfl_id},
+			now(),
+			#{user_id}
+		);
+		
+		<if test='file_ids != null and file_ids != ""'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnfl_id}, 
+				FILE_ID, 
+				'MANAGE_LEVEL_EVL', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{user_id}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+			AND 1=1;
+		</if>
+	</insert>
+	
+	<update  id="mngLevelDocumentEvaluationUpdate" parameterType="zvl">
+		UPDATE MANAGE_LEVEL_EVL SET
+			INSTT_CD = #{instt_cd},
+			INDEX_SEQ = #{index_seq},
+			<choose>
+				<when test='periodCode.contains("B")'>
+					<choose>
+						<when test='excpPermYn == "Y"'>
+							RESULT_SCORE1 = NULL,
+							RESULT_SCORE2 = NULL,
+							STATUS = NULL,
+						</when>
+						<otherwise>
+							RESULT_SCORE1 = #{result_score},
+							RESULT_SCORE2 = #{result_score},
+							STATUS = 'ES01',
+						</otherwise>
+					</choose>
+					EVL_OPINION1 = #{evl_opinion},
+					EVL_OPINION2 = #{evl_opinion},
+				</when>
+				<when test='periodCode.contains("D")'>
+					<choose>
+						<when test='excpPermYn == "Y"'>
+							RESULT_SCORE2 = NULL,
+							STATUS = NULL,
+						</when>
+						<otherwise>
+							RESULT_SCORE2 = #{result_score},
+							STATUS = 'ES04',
+						</otherwise>
+					</choose>
+					EVL_OPINION2 = #{evl_opinion},
+				</when>
+			</choose>
+			MEMO = #{memo},
+			ATCHMNFL_ID = #{atchmnfl_id},
+			UPDT_ID = #{user_id},
+			UPDT_DT = NOW()
+		WHERE
+			INSTT_CD = #{instt_cd}
+			AND INDEX_SEQ = #{index_seq};
+		  
+			<if test='file_ids != null and file_ids != ""'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnfl_id}, 
+				FILE_ID, 
+				'MANAGE_LEVEL_EVL', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{regist_id}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+			AND 1=1;
+		</if>
+	</update>
+	
+	<select id="mngLevelDocumentEvaluationCntMemoFile" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+	</select>
+	
+	<delete id="mngLevelDocumentEvaluationDeleteMemoFile" parameterType="zvl">
+		DELETE FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{file_id};
+
+		DELETE FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+			AND FILE_ID = #{file_id};
+	</delete>
+	
+	<update id="mngLevelDocumentEvaluationDeleteMemoFileId" parameterType="zvl">
+		UPDATE MANAGE_LEVEL_EVL SET
+			ATCHMNFL_ID = ''
+		WHERE
+			INSTT_CD = #{instt_cd}
+			AND INDEX_SEQ = #{index_seq};
+	</update>
+	
+	<select id="mngLevelDocumentEvaluationPoint" parameterType="zvl" resultType="zvl">
+		SELECT
+			B.INSTT_CD,
+			A.INDEX_SEQ,
+			A.ORDER_NO,
+			A.EXCP_PERM_YN,
+			B.EXCP_PERM_YN EXCP_PERM_REQ_YN,
+			FORMAT(C.RESULT_SCORE1, 2) RESULT_SCORE1,
+			FORMAT(C.RESULT_SCORE2, 2) RESULT_SCORE2
+		FROM 
+			mng_level_idx_mastr A 
+			JOIN manage_level_reqst B ON A.INDEX_SEQ = B.MNG_LEVEL_IDX_SEQ AND A.ORDER_NO = B.ORDER_NO AND B.INSTT_CD = #{s_instt_cd}
+			LEFT JOIN manage_level_evl C ON A.INDEX_SEQ = C.INDEX_SEQ AND B.INSTT_CD = C.INSTT_CD
+		WHERE
+			A.ORDER_NO = #{s_order_no}
+	</select>
+	
+	<select id="mngLevelDocumentEvaluationAvgPoint" parameterType="zvl" resultType="zvl">
+		SELECT
+			ROUND(SUM(AA.AVG_SCORE1), 2) AVG_SCORE1,
+			ROUND(SUM(AA.AVG_SCORE2), 2) AVG_SCORE2
+		FROM
+		(
+			SELECT
+				C.RESULT_TOT_SCORE1 AVG_SCORE1,
+				C.RESULT_TOT_SCORE2 AVG_SCORE2
+			FROM 
+				mng_level_idx_mastr A 
+				JOIN manage_level_reqst B ON A.INDEX_SEQ = B.MNG_LEVEL_IDX_SEQ AND A.ORDER_NO = B.ORDER_NO AND B.INSTT_CD = #{s_instt_cd}
+				LEFT JOIN manage_level_evl C ON A.INDEX_SEQ = C.INDEX_SEQ AND B.INSTT_CD = C.INSTT_CD
+			WHERE
+				A.ORDER_NO = #{s_order_no}
+			GROUP BY
+				LCLAS_ORDER, MLSFC_ORDER
+		) AA
+	</select>
+	
+	<insert id="mngLevelDocumentEvaluationAvgPointInsert" parameterType="zvl">
+		INSERT INTO MANAGE_LEVEL_GNRLZ_EVL
+			(
+				INSTT_CD, 
+				ORDER_NO,
+				<choose>
+					<when test='periodCode.contains("B")'>
+						GNRLZ_EVL1, 
+						GNRLZ_EVL2,
+						TOT_RESULT_SCORE1,
+						TOT_RESULT_SCORE2,
+						STATUS,
+					</when>
+					<when test='periodCode.contains("D")'>
+						GNRLZ_EVL2,
+						RESULT_SCORE2,
+						STATUS,
+					</when>
+				</choose> 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			VALUES 
+			(
+				#{s_instt_cd}, 
+				#{s_order_no}, 
+				<choose>
+					<when test='periodCode.contains("B")'>
+						#{gnrlzEvl}, 
+						#{gnrlzEvl},
+						#{totResultScore1},
+						#{totResultScore2},
+						'ES02',
+					</when>
+					<when test='periodCode.contains("D")'>
+						#{gnrlzEvl},
+						#{totResultScore2},
+						'ES05',
+					</when>
+				</choose> 
+				NOW(), 
+				#{regist_id}, 
+				'N'
+			) ON DUPLICATE KEY
+			UPDATE
+			<choose>
+				<when test='periodCode.contains("B")'>
+					GNRLZ_EVL1 = #{gnrlzEvl}, 
+					GNRLZ_EVL2= #{gnrlzEvl},
+					TOT_RESULT_SCORE1 = #{totResultScore1},
+					TOT_RESULT_SCORE2 = #{totResultScore2},
+					STATUS = 'ES02',
+					UPDT_DT = NOW(), 
+					UPDT_ID = #{regist_id} 
+				</when>
+				<when test='periodCode.contains("D")'>
+					GNRLZ_EVL2 = #{gnrlzEvl},
+					RESULT_SCORE2 = #{totResultScore2},
+					STATUS = 'ES05',
+					UPDT_DT = NOW(), 
+					UPDT_ID = #{regist_id}
+				</when>
+			</choose> 
+	</insert>
+
+	<update id="mngLevelDocumentEvaluationAvgPointUpdate" parameterType="zvl">
+		UPDATE MANAGE_LEVEL_GNRLZ_EVL
+		SET
+			GNRLZ_EVL2 = #{gnrlzEvl},
+			TOT_RESULT_SCORE2 = #{totResultScore2},
+			STATUS = 'ES05',
+			UPDT_DT=NOW(),
+			UPDT_ID = #{update_id}
+		WHERE 
+			INSTT_CD = #{s_instt_cd}
+			AND ORDER_NO = #{s_order_no}
+	</update>
+	
+	<update id="mngLevelDocumentEvaluationStatusUpdate" parameterType="zvl">
+		UPDATE MANAGE_LEVEL_EVL
+		SET
+			<choose>
+				<when test='periodCode.contains("B")'>
+					STATUS = 'ES02',
+				</when>
+				<when test='periodCode.contains("D")'>
+					STATUS = 'ES05',
+				</when>
+			</choose> 
+			UPDT_DT = NOW(),
+			UPDT_ID = #{update_id}
+		WHERE 
+			INSTT_CD = #{s_instt_cd}
+			AND INDEX_SEQ IN (SELECT INDEX_SEQ FROM MNG_LEVEL_IDX_MASTR WHERE ORDER_NO = #{s_order_no})
+			AND (STATUS IS NOT NULL AND STATUS != '')
+	</update>
+	
+	<select id="selectMngLevelReqstAllFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			C.FILE_ID fileId
+		FROM
+			MNG_LEVEL_IDX_MASTR A
+			JOIN MANAGE_LEVEL_REQST D
+				ON A.INDEX_SEQ = D.MNG_LEVEL_IDX_SEQ
+			JOIN ATTACHMENT_FILE_MAP B
+				ON D.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C
+				ON B.FILE_ID = C.FILE_ID
+		WHERE
+			D.ORDER_NO = #{s_order_no}
+		AND
+			D.INSTT_CD = #{s_instt_cd}
+	</select>
+	
+	<select id="mngLevelResultReportFile" parameterType="zvl" resultType="zvl">
+		SELECT
+			C.FILE_ID fileId
+		FROM
+			MANAGE_LEVEL_REQST A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE
+			A.ORDER_NO = #{s_order_no}
+			AND A.INSTT_CD = #{s_instt_cd}
+			AND A.MNG_LEVEL_IDX_SEQ = '0'
+	
+	</select>
+	
+	<select id="mngLevelFobjctResnFileAjax" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INDEX_SEQ INDEX_SEQ,
+			C.FILE_ID,
+			C.FILE_NAME,
+			C.SAVE_FILE_NAME,
+			C.FILE_PATH,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			MANAGE_LEVEL_EVL A,
+			ATTACHMENT_FILE_MAP B, 
+			ATTACHMENT_FILE_MASTR C 
+		WHERE 
+		1=1 
+			AND A.INDEX_SEQ = #{s_index_seq}
+			AND A.INSTT_CD  = #{s_instt_cd}
+			AND A.FOBJCT_ATCHMNFL_ID = B.ATCHMNFL_ID
+			AND B.FILE_ID = C.FILE_ID
+	</select>
+	
+	<select id="mngLevelResultBeforeYear" parameterType="zvl" resultType="zvl">
+		SELECT 
+			MAX(ORDER_NO) RECENT_YEAR 
+		FROM 
+			MANAGE_LEVEL_GNRLZ_EVL 
+		WHERE 
+			INSTT_CD = #{s_instt_cd} 
+			AND ORDER_NO <![CDATA[<]]> #{s_order_no}
+	</select>
+	
+	<update  id="updateResultTotPerScoreAjax" parameterType="zvl">
+		UPDATE MANAGE_LEVEL_EVL A SET
+			<choose>
+				<when test='periodCode.contains("B")'>
+					A.RESULT_TOT_SCORE1 = #{resultTotScore},
+					A.RESULT_TOT_SCORE2 = #{resultTotScore},
+					A.RESULT_TOT_PER1 = #{resultTotPer},
+					A.RESULT_TOT_PER2 = #{resultTotPer},
+				</when>
+				<when test='periodCode.contains("D")'>
+					A.RESULT_TOT_SCORE2 = #{resultTotScore},
+					A.RESULT_TOT_PER2 = #{resultTotPer},
+				</when>
+			</choose>
+			A.UPDT_ID = #{userId},
+			A.UPDT_DT = NOW()
+		WHERE
+			A.INSTT_CD = #{insttCd}
+		AND 
+			EXISTS(SELECT 1 
+						FROM MNG_LEVEL_IDX_MASTR
+						WHERE A.INDEX_SEQ = INDEX_SEQ
+						AND ORDER_NO = #{orderNo}
+						AND LCLAS_ORDER = #{lclasOrder}
+						AND MLSFC_ORDER = #{mlsfcOrder}
+						)
+	</update>
+</mapper>

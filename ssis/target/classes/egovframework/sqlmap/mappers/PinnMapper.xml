@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="pinn">
+	
+	<!-- 서면점검 START -->
+	<select id="selectPinnSummaryList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.INSTT_NM insttNm
+			, A.INSTT_CL_CD insttClCd
+      		, B.MM mm
+      		, B.MNG_LEVEL_CN mngLevelCn
+			, C.SCHDUL_SEQ schdulSeq
+      		, C.STATUS status
+		FROM
+			INSTITUTION_MASTR A
+      		LEFT OUTER JOIN FYER_SCHDUL B
+			ON MNG_LEVEL_CD = 'ML03'
+      		AND YYYY = #{searchYyyy}
+			LEFT OUTER JOIN PINN_REQST_EVAL C
+			ON A.INSTT_CD = C.INSTT_CD
+      		AND B.SEQ = C.SCHDUL_SEQ
+		WHERE
+   			A.DELETE_YN = 'N'
+   		<if test='null != insttClCd and "" != insttClCd'>
+		AND A.INSTT_CL_CD = #{insttClCd}
+		</if>
+		<if test='null != insttCd and "" != insttCd'>
+		AND A.INSTT_CD = #{insttCd}
+		</if>
+   		ORDER BY A.OUTPUT_ORDR, B.MM
+	</select>
+	
+	<select id="selectInsttGroupList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.INSTT_CD insttCd
+			, A.INSTT_NM insttNm
+			, A.INSTT_CL_CD insttClCd
+			, B.CODE_NM insttClNm
+			, C.rowCnt
+		FROM
+			INSTITUTION_MASTR A
+			LEFT OUTER JOIN CMMN_CD_MASTR B
+			ON A.INSTT_CL_CD = B.CODE
+  			LEFT OUTER JOIN
+  			(
+    			SELECT
+    				  INSTT_CL_CD
+    				, COUNT(*) rowCnt
+    			FROM
+    				INSTITUTION_MASTR
+    			WHERE
+   					DELETE_YN = 'N'
+    			<if test='null != insttClCd and "" != insttClCd'>
+    			AND INSTT_CL_CD = #{insttClCd}
+    			</if>
+    			<if test='null != insttCd and "" != insttCd'>
+    			AND INSTT_CD = #{insttCd}
+    			</if>
+    			GROUP BY
+    				INSTT_CL_CD
+  			) C
+  			ON A.INSTT_CL_CD = C.INSTT_CL_CD
+  			AND A.DELETE_YN = 'N'
+		WHERE
+   			A.DELETE_YN = 'N'
+		<if test='null != insttClCd and "" != insttClCd'>
+		AND A.INSTT_CL_CD = #{insttClCd}
+		</if>
+		<if test='null != insttCd and "" != insttCd'>
+		AND A.INSTT_CD = #{insttCd}
+		</if>
+   		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="selectInsttClSelectBoxList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.CODE code
+			, A.CODE_NM codeNm
+		FROM 
+			CMMN_CD_MASTR A
+		WHERE
+			A.DELETE_YN = 'N'
+		AND
+			A.UPPER_CD = 'IC00'
+	</select>
+	
+	<select id="selectInsttSelectBoxList" parameterType="zvl" resultType="zvl">
+		SELECT DISTINCT
+			  A.INSTT_CD insttCd
+			, A.INSTT_NM insttNm
+			, A.INSTT_CL_CD insttClCd
+			, (SELECT COUNT(*) FROM BSIS_STTUS_SYS   B WHERE A.INSTT_CD = B.INSTT_CD AND B.ORDER_NO = #{orderNo} ) AS cntSys
+			, (SELECT COUNT(*) FROM BSIS_STTUS_VIDEO D WHERE A.INSTT_CD = D.INSTT_CD AND D.ORDER_NO = #{orderNo} ) AS cntVideo			
+		FROM 
+			INSTITUTION_MASTR A
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='insttClCd != null and insttClCd != ""'>
+			AND A.INSTT_CL_CD = #{insttClCd}
+		</if>
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="selectFyerSchdulSelectBoxList" resultType="zvl">
+		SELECT 
+			  DISTINCT A.YYYY as yyyy
+		FROM 
+			FYER_SCHDUL A
+		WHERE
+			A.DELETE_YN = 'N'
+		AND
+			A.MNG_LEVEL_CD = 'ML03'
+		ORDER BY
+			A.YYYY
+	</select>
+	
+	<select id="selectPinnReqEvalDtlList" parameterType="zvl" resultType="zvl">
+		SELECT
+		   	  A.SEQ seq
+			, A.MM mm
+			, A.MNG_LEVEL_CN mngLevelCn
+			, B.STATUS status
+			, B.ATCHMNFL_ID atchmnflId
+			, B.EVAL_ATCHMNFL_ID evalAtchmnflId
+			, DATE_FORMAT(B.REGIST_DT, '%Y.%m.%d') registDt
+		FROM
+			FYER_SCHDUL A
+			LEFT OUTER JOIN PINN_REQST_EVAL B
+			ON B.INSTT_CD = #{insttCd}
+      		AND A.SEQ = B.SCHDUL_SEQ
+		WHERE
+			A.MNG_LEVEL_CD = 'ML03'
+		AND
+			A.YYYY = #{searchYyyy}
+		ORDER BY
+			A.MM
+	</select>
+	
+	<select id="selectPinnReqFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.SCHDUL_SEQ schdulSeq
+			, A.ATCHMNFL_ID atchmnflId
+			, D.FILE_ID fileId
+			, D.FILE_NAME fileName
+			, D.SAVE_FILE_NAME saveFileName
+			, D.FILE_PATH filePath
+			, D.MIME_TYPE mimeType,
+			SUBSTRING(D.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			PINN_REQST_EVAL A
+			LEFT JOIN ATTACHMENT_FILE_MAP C ON A.ATCHMNFL_ID = C.ATCHMNFL_ID
+			LEFT JOIN ATTACHMENT_FILE_MASTR D ON C.FILE_ID = D.FILE_ID
+			, FYER_SCHDUL B
+		WHERE 
+			B.SEQ = A.SCHDUL_SEQ
+		AND
+			B.MNG_LEVEL_CD = 'ML03'
+		AND
+			B.YYYY = #{searchYyyy}
+		AND
+			A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<select id="selectPinnEvalFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.SCHDUL_SEQ schdulSeq
+			, A.EVAL_ATCHMNFL_ID atchmnflId
+			, D.FILE_ID fileId
+			, D.FILE_NAME fileName
+			, D.SAVE_FILE_NAME saveFileName
+			, D.FILE_PATH filePath
+			, D.MIME_TYPE mimeType,
+			SUBSTRING(D.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			PINN_REQST_EVAL A
+			LEFT JOIN ATTACHMENT_FILE_MAP C ON A.EVAL_ATCHMNFL_ID = C.ATCHMNFL_ID
+			LEFT JOIN ATTACHMENT_FILE_MASTR D ON C.FILE_ID = D.FILE_ID
+			, FYER_SCHDUL B
+		WHERE 
+			B.SEQ = A.SCHDUL_SEQ
+		AND
+			B.MNG_LEVEL_CD = 'ML03'
+		AND
+			B.YYYY = #{searchYyyy}
+		AND
+			A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<insert id="insertPinnReqstEval" parameterType="zvl">
+		INSERT INTO PINN_REQST_EVAL
+		(
+			  INSTT_CD
+			, SCHDUL_SEQ
+			, STATUS
+			, ATCHMNFL_ID
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+			  #{insttCd}
+			, #{schdulSeq}
+			, 'RS03'
+			, #{atchmnfl_id}
+			, now()	
+			, #{registId}
+		);
+
+		<if test="file_ids != null and file_ids.length > 0">
+			INSERT ATTACHMENT_FILE_MAP ( ATCHMNFL_ID, FILE_ID, TABLE_NM, TABLE_ID, REGIST_DT, REGIST_ID, DELETE_YN  )
+			SELECT  #{atchmnfl_id}, FILE_ID, 'PINN_REQST_EVAL', LAST_INSERT_ID(), NOW(), #{registId}, 'N'
+			FROM    ATTACHMENT_FILE_MASTR
+			WHERE   FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+			AND		1=1;
+		</if>
+		
+	</insert>
+
+	<update id="updatePinnReqst" parameterType="zvl">
+		UPDATE
+			PINN_REQST_EVAL
+		SET
+			  UPDT_DT = NOW()
+			, UPDT_ID = #{updtId} 
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq};		  
+		  
+		  <if test="file_ids != null and file_ids.length > 0">
+			INSERT ATTACHMENT_FILE_MAP ( ATCHMNFL_ID, FILE_ID, TABLE_NM, TABLE_ID, REGIST_DT, REGIST_ID, DELETE_YN  )
+			SELECT  #{atchmnfl_id}, FILE_ID, 'PINN_REQST_EVAL', LAST_INSERT_ID(), NOW(), #{registId}, 'N'
+			FROM    ATTACHMENT_FILE_MASTR
+			WHERE   FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+	</update>
+	
+	<update id="deletePinnReqst" parameterType="zvl">
+		DELETE
+		FROM
+			PINN_REQST_EVAL 
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq}
+	</update>
+	
+	<delete id="deletePinnReqstEvalFileMstr" parameterType="zvl">
+		DELETE
+		FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{fileId}
+	</delete>
+	
+	<delete id="deletePinnReqstEvalFileMap" parameterType="zvl">
+		DELETE
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+		AND
+			FILE_ID = #{fileId}
+	</delete>
+	
+	<select id="selectPinnReqstEvalFileCnt" parameterType="zvl" resultType="int">
+		SELECT COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+	</select>
+	
+	<select id="selectPinnReqstEvalCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			PINN_REQST_EVAL
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq}
+	</select>
+	
+	<update id="updatePinnEval" parameterType="zvl">
+		UPDATE
+			PINN_REQST_EVAL
+		SET
+			  STATUS = 'ES05'
+			, EVAL_ATCHMNFL_ID = #{atchmnfl_id}
+			<if test='null != registId and "" != registId'>
+			, EVAL_REGIST_DT = NOW()
+			, EVAL_REGIST_ID = #{registId} 
+			</if>
+			<if test='null != updtId and "" != updtId'>
+			, EVAL_UPDT_DT = NOW()
+			, EVAL_UPDT_ID = #{updtId} 
+			</if>
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq};		  
+		  
+		  <if test="file_ids != null and file_ids.length > 0">
+			INSERT ATTACHMENT_FILE_MAP ( ATCHMNFL_ID, FILE_ID, TABLE_NM, TABLE_ID, REGIST_DT, REGIST_ID, DELETE_YN  )
+			SELECT  #{atchmnfl_id}, FILE_ID, 'PINN_REQST_EVAL', LAST_INSERT_ID(), NOW(),
+			<if test='null != registId and "" != registId'>
+			#{registId}, 
+			</if>
+			<if test='null != updtId and "" != updtId'>
+			#{updtId}, 
+			</if>
+			  'N'
+			FROM    ATTACHMENT_FILE_MASTR
+			WHERE   FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+		<!-- 20180112 개인정보 담당자에게 자동으로 메시지 전달 로직 오류로 주석처리
+		;
+		
+		INSERT INTO NOTIFICATION_MSSAGE
+		(
+			USER_ID,
+			SUBJECT,
+			CONTENTS,
+			RECPTN_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		VALUES
+		(
+			#{updtId},
+			'서면점검 결과통보',
+			'서면점검 결과통보가 있습니다. 서면점검을 확인하세요.',
+			'N',
+			now(),
+			#{updtId},
+			'N'
+		);
+		
+		INSERT INTO NOTIFICATION_MSSAGE_DETAIL
+		(
+		    SEQ,
+			USER_ID,
+			RECPTN_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		SELECT
+			LAST_INSERT_ID(),
+			USER_ID,
+			'N',
+			NOW(),
+			#{updtId},
+			'N'
+		FROM
+			USER_MASTR
+		WHERE
+			INSTT_CD = #{insttCd}
+		LIMIT
+			1
+		-->
+	</update>
+	
+	<update id="deletePinnEval" parameterType="zvl">
+		UPDATE
+			PINN_REQST_EVAL
+		SET
+		  	  STATUS = 'RS03'
+			, EVAL_ATCHMNFL_ID = null
+			, EVAL_REGIST_DT = null
+			, EVAL_REGIST_ID = null 
+			, EVAL_UPDT_DT = null
+			, EVAL_UPDT_ID = null
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq}
+	</update>
+	
+	<update id="updatePinnEvalStatus" parameterType="zvl">
+		UPDATE
+			PINN_REQST_EVAL
+		SET
+			  STATUS = #{status}
+			, EVAL_UPDT_DT = NOW()
+			, EVAL_UPDT_ID = #{updtId} 
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq};
+	</update>
+	
+	<insert id="insertPinnEvalStatus" parameterType="zvl">
+		INSERT INTO PINN_REQST_EVAL
+		(
+			  INSTT_CD
+			, SCHDUL_SEQ
+			, STATUS
+			, ATCHMNFL_ID
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+			  #{insttCd}
+			, #{schdulSeq}
+			, #{status}
+			, ''
+			, now()	
+			, #{updtId}
+		);		
+	</insert>
+	
+	<delete id="deletePinnEvalStatus" parameterType="zvl">
+		DELETE
+		FROM
+			PINN_REQST_EVAL
+		WHERE
+			INSTT_CD = #{insttCd}
+		AND
+			SCHDUL_SEQ = #{schdulSeq};
+	</delete>
+	<!-- 서면점검 END -->
+</mapper>

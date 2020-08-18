@@ -1,0 +1,27 @@
+<header class="cont_header">
+	<div class="go_back"><button type="button" onclick="pSlideFn.onAddCont({direction:'prev'});"><span></span></button></div>
+	<h2>배송캘린더</h2>
+	<div class="refreshCalendar">
+		<select name="" id="" onchange="pSlideFn.onAddCont({direction:'next',url:'ajax/__ajax_mypage_calendar.html'});" class="">
+			<option value="1">헬씨퀴진 + 알라까르떼 슬림</option>
+			<option value="2">헬씨퀴진 + 알라까르떼 슬림2</option>
+			<option value="3">헬씨퀴진 + 알라까르떼 슬림3</option>
+		</select>
+	</div>
+</header>
+<div class="content">
+	<div id="scheduler"></div>	
+	<div class="scheduler_rangectrl">
+		<ul>
+			<li><a href="javascript:void(0);" onclick="calendarFn.changePattern();">
+			<img src="dist/images/mypage/ico_d_patternAll.png"><p>배송패턴 변경</p></a></li>
+			<li><a href="javascript:void(0);" onclick="calendarFn.selectTerm();">
+			<img src="dist/images/mypage/ico_d_scheduleAll.png"><p>배송일정 변경</p></a></li>
+			<li><a href="javascript:void(0);" onclick="calendarFn.selectDelivery();">
+			<img src="dist/images/mypage/ico_d_areaAll.png"><p>배송지 변경</p></a></li>
+		</ul>
+	</div>
+</div>
+
+	
+<script src="dist/js/calendar.js"></script>

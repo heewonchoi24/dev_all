@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license>
+	<signature>MCwCFFZRrI1RHcQTHg6MhsEMfoScI/IxAhRyKRAVsARdjpzkLgfBNedIL720vA==</signature>
+	<info>
+		<creation>2013-09-06 12:40:39 +0900</creation>
+		<product>
+			<name>tmaxssoagent</name>
+			<description>java filter agent</description>
+			<version>3.0</version>
+			<restriction>
+				<name>hostname</name>
+				<value>PMOGEATSSLIM</value>
+			</restriction>
+		</product>
+	</info>
+</license>

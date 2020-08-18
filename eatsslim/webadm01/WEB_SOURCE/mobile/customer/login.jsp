@@ -1,0 +1,310 @@
+<%@ page language="java" contentType="text/html; charset=EUC-KR" pageEncoding="EUC-KR"%>
+<%@ page import ="java.util.regex.*"%>
+<%@ page import = "javax.servlet.http.HttpSession"%>
+<%@ page import ="java.text.*"%>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.security.SecureRandom" %>
+<%@ page import="java.math.BigInteger" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.net.URL" %>
+<%@ page import="java.net.HttpURLConnection" %>
+<%@ page import="java.io.BufferedReader" %>
+<%@ page import="java.io.InputStreamReader" %>
+<%@ page import="net.sf.json.JSONArray" %>
+<%@ page import="net.sf.json.JSONObject" %>
+<%@ page import="javax.servlet.http.HttpUtils"%>
+<%@ include file="/lib/config.jsp"%>
+<%-- <%@ include file="/mobile/common/include/inc-login-check.jsp"%> --%>
+<%@ include file="/mobile/common/include/inc-top.jsp"%>
+<%
+    request.setCharacterEncoding("euc-kr");
+	response.setCharacterEncoding("euc-kr");        //한글 깨짐 방지
+
+	String referer = request.getHeader("referer");
+	if(referer == null || "".equals(referer)) referer = "/mobile";
+	session.setAttribute("RETURN_URL",referer);
+
+%>
+<%
+String table		= "ESL_ORDER";
+String query		= "";
+String query1		= "";
+String query2		= "";
+Statement stmt1		= null;
+ResultSet rs1		= null;
+Statement stmt2		= null;
+ResultSet rs2		= null;
+String minDate		= "";
+String maxDate		= "";
+String devlDates	= "";
+stmt1				= conn.createStatement();
+stmt2				= conn.createStatement();
+String stdate		= ut.inject(request.getParameter("stdate"));
+String ltdate		= ut.inject(request.getParameter("ltdate"));
+String stateType	= ut.inject(request.getParameter("state_type"));
+String where		= "";
+String param		= "";
+String orderNum		= "";
+String orderDate	= "";
+/* int payPrice		= 0; */
+String payType		= "";
+String orderState	= "";
+int cnt				= 0;
+String goodsList	= "";
+int listSize		= 0;
+String gId			= "";
+String groupCode	= "";
+ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String,String>>();
+String menuF = request.getParameter("menuF");
+String menuS = request.getParameter("menuS");
+System.out.println("menuF : "+menuF);
+System.out.println("menuS : "+menuS);
+
+NumberFormat nf		= NumberFormat.getNumberInstance();
+Calendar cal = Calendar.getInstance();
+cal.setTime(new Date()); //오늘
+String cDate=(new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
+cal.setTime(new Date());
+/* cal.add ( Calendar.MONTH, -1 ); */ //1개월전
+cal.add ( Calendar.MONTH, -5 ); //10개월전
+String preMonth3=(new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
+where			= " WHERE MEMBER_ID = '"+ eslMemberId +"' AND ORDER_STATE > 0 AND ORDER_STATE < 90";
+where			+= " AND DATE_FORMAT(ORDER_DATE, '%Y-%m-%d') BETWEEN '"+ preMonth3 +"' AND '"+ cDate +"'";
+query		= "SELECT COUNT(*)";
+query		+= " FROM "+ table + where; //out.print(query); if(true)return;
+try {
+	rs = stmt.executeQuery(query);
+} catch(Exception e) {
+	out.println(e+"=>"+query);
+	if(true)return;
+}
+
+if (rs.next()) {
+	cnt		= rs.getInt(1);
+}
+rs.close();
+
+query		= "SELECT ORDER_NUM, DATE_FORMAT(ORDER_DATE, '%Y.%m.%d') ORDER_DATE, ORDER_NAME, PAY_TYPE, PAY_PRICE,";
+query		+= "	ORDER_STATE, ORDER_ENV";
+query		+= " FROM "+ table + where;
+query		+= " ORDER BY ORDER_NUM DESC"; //out.print(query); if(true)return;
+try {
+	rs = stmt.executeQuery(query);
+} catch(Exception e) {
+	out.println(e+"=>"+query);
+	if(true)return;
+}
+
+
+///////////////////////////
+%>
+<script type="text/javascript">
+
+//	Kakao API Key
+if(Kakao.Auth == undefined) Kakao.init('731d595060bf450c56ec6954d32ab98d');
+
+//	Kakao API Start
+function loginWithKakao(){
+  Kakao.Auth.login({
+	  success: function(authObj) {
+          // 로그인 성공시, API를 호출합니다.
+          Kakao.API.request({
+            url: '/v1/user/me',
+            success: function(res) {
+
+              var id = JSON.stringify(res.kaccount_email);
+              var name = JSON.stringify(res.properties.nickname);
+              var key = JSON.stringify(res.id);
+
+              var idS = String(id);
+           	  var nameS = String(name);
+
+              var idR = idS.replace("\"", "");
+           	  var nameR = nameS.replace("\"", "");
+
+           	  var idT 	= idR.replace("\"", "");
+           	  var nameT = nameR.replace("\"", "");
+
+              document.userForm.Name.value = nameT;
+              document.userForm.Id.value = "ka_"+key;
+              document.userForm.Key.value = key;
+              document.userForm.Email.value = idT;
+
+              document.acceptCharset  = "euc-kr";
+              document.userForm.action = "/shop/popup/snsRegMUser.jsp";
+              document.userForm.submit();
+
+            },
+            fail: function(error) {
+              alert(JSON.stringify(error));
+            }
+          });
+        },
+     		fail: function(err) {
+       		alert(JSON.stringify(err));
+     		}
+   	});
+}
+
+
+//facebook 초기 설정 코드
+window.fbAsyncInit = function() {
+	FB.init({
+		appId      : '230623714086295',
+	    xfbml      : true,
+	    version    : 'v2.9'
+	});
+	FB.AppEvents.logPageView();
+};
+
+(function(d, s, id){
+	var js, fjs = d.getElementsByTagName(s)[0];
+	if (d.getElementById(id)) {return;}
+	js 		= d.createElement(s); js.id = id;
+	js.src 	= "//connect.facebook.net/en_US/sdk.js";
+	fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+
+
+
+function statusChangeCallback(response) {
+	console.log('statusChangeCallback');
+	console.log(response);
+	// response 객체는 현재 로그인 상태를 나타내는 정보를 보여준다.
+	// 앱에서 현재의 로그인 상태에 따라 동작하면 된다.
+	// FB.getLoginStatus().의 레퍼런스에서 더 자세한 내용이 참조 가능하다.
+	if (response.status === 'connected') {
+		//페이스북을 통해서 로그인이 된경우
+ 	   	testAPI();
+	} else if(response.status === 'not_authorized' ){
+		//페이스북에는 로그인 했으나 앱에는 로그인이 되어 있지 않은 경우
+		//document.getElementById('status').innerHTML = 'Please log ' + 'into this app.';
+		alert('Please log ' + 'into this app.');
+ 	} else {
+ 		//페이스북에 로그인이 되어 있지 않아서 앱에도 로그인 여부가 불확실 한 경우
+ 	  	//document.getElementById('status').innerHTML = 'Please log ' + 'into Facebook.';
+ 	  	alert('Please log ' + 'into Facebook.');
+ 	}
+}
+
+//facebook login
+function checkLoginState() {
+	/* FB.getLoginStatus(function(response) {
+		FB.login(function(response) {
+		}, {scope: 'public_profile, email, user_birthday '});
+	  });
+    statusChangeCallback(response); */
+
+	FB.login(function(response) {
+		FB.getLoginStatus(function(response) {
+			statusChangeCallback(response);
+		});
+	}, {scope: 'public_profile, email, user_birthday', return_scopes: true});
+}
+
+$(document).ready(function(){
+	$("#fbLoginBtn").on("click",function(){checkLoginState()});
+	/*
+	//add event listener to login button
+	document.getElementById('fbLoginBtn').addEventListener('click', function() {
+		checkLoginState();
+	}, false);
+	*/
+
+});
+
+
+function testAPI() {
+	var name	= "";
+	var userId 	= "";
+	var email	= "";
+	var key		= "";
+	FB.api('/me', function(response) {
+		key = response.id;
+		document.getElementById('Key').value = response.id;
+		document.getElementById('Id').value = "fa_"+key;
+		name = response.name;
+		document.getElementById('Name').value = response.name;
+	});
+	FB.api('/me', {fields: 'email'}, function(response) {
+		id = response.email;
+		document.getElementById('Email').value = response.email;
+		instInfo();
+	});
+
+}
+
+function instInfo(){
+    document.acceptCharset  		= "euc-kr";
+    document.userForm.action 		= "/shop/popup/snsRegMUser.jsp";
+    document.userForm.submit();
+}
+
+
+</script>
+<%
+// 네이버 설정
+String clientId 	= "R3bOi32f0cKYCX8LuXDq";//애플리케이션 클라이언트 아이디값";
+String redirectURI 	= URLEncoder.encode("http://www.eatsslim.co.kr/shop/popup/naverM.jsp", "UTF-8");
+SecureRandom random = new SecureRandom();
+String state 		= new BigInteger(130, random).toString();
+
+String apiURL 		= "https://nid.naver.com/oauth2.0/authorize?response_type=code";
+apiURL 				+= "&client_id=" + clientId;
+apiURL 				+= "&redirect_uri=" + redirectURI;
+apiURL 				+= "&state=" + state;
+session.setAttribute("state", state);
+%>
+
+<div id="wrap" class="expansioncss">
+	<%@ include file="/mobile/common/include/inc-header.jsp"%>
+	<!-- End header -->
+	<div id="container">
+		<form name="userForm" id="userForm" method="post" action="/shop/popup/snsRegMUser.jsp">
+			<input type="hidden" name="Id" id="Id">
+			<input type="hidden" name="Name" id="Name">
+			<input type="hidden" name="Key" id="Key">
+			<input type="hidden" name="Email" id="Email">
+		</form>
+		<nav class="navigation nbd">
+			<h1 class="title">로그인</h1>
+		</nav>
+		<div class="bx_sso_login">
+			<div class="section_sso">
+				<div class="section_inner">
+					<p>풀무원 통합회원 로그인 페이지로<br>이동하시겠습니까?</p>
+					<a href="/sso/single_sso.jsp">
+						<img src="/mobile/common/images/common/ico_m_logo.png" alt="">
+						<strong>통합회원</strong> <span>로그인</span>
+					</a>
+				</div>
+			</div>
+ 			<div class="section_sns">
+ 				<div class="section_inner">
+ 					<h3>SNS 로그인</h3>
+ 					<p>SNS 로그인 후 결제 시 동일한 SNS로 로그인 했을 때에<br/> 주문정보 조회가 가능합니다.</p>
+ 					<ul>
+ 						<li><a href="<%=apiURL%>" id="NaverLoginBtn"><img src="/mobile/common/images/common/ico_m_naver.png" alt="" /></a></li>
+ 						<li><a href="javascript:loginWithKakao();" id="custom-login-btn"><img src="/mobile/common/images/common/ico_m_kakao.png" alt="" /></a></li>
+ 						<li><a href="javascript:void(0);" id="fbLoginBtn"><img src="/mobile/common/images/common/ico_m_facebook.png" alt="" /></a></li>
+ 						<!-- <li><a href="javascript:void(0);"><img src="/mobile/common/images/common/ico_m_instagram.png" alt="" /></a></li> -->
+ 					</ul>
+ 					<p style="margin-top: 1em;">* SNS 로그인 시 서비스 이용에 일부 제한될 수 있습니다.<br/>(카카오톡 모바일고객센터를 통한 주문 조회/변경 이용 제한 등)</p>
+ 				</div>
+ 			</div>
+		</div>
+		<!-- <div class="bx_sso_join">
+			<p>풀무원 통합회원 아이디가 없으신 분은 풀무원 통합회원에<br>가입 하셔야 주문하기 및 결제를 계속 진행하실 수 있습니다.</p>
+			<a href="https://member.pulmuone.co.kr/customer/register_R1.jsp?siteno=0002400000">풀무원 회원가입</a>
+		</div> -->
+
+
+	</div>
+	<!-- End container -->
+
+		<%@ include file="/mobile/common/include/inc-footer.jsp"%>
+	<!-- End footer -->
+</div>
+</body>
+</html>

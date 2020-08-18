@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cjsBbs">
+
+	<select id="bbsList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+		
+		SELECT
+			ROWNUM rowNum,
+			SEQ seq,
+			SUBJECT subject,
+			READ_COUNT readCount,
+			ATCHMNFL_ID atchmnflId,
+			REGIST_DT registDt
+		FROM
+		(
+		SELECT
+			@ROWNUM:=@ROWNUM+1 ROWNUM,
+			SEQ, 
+			SUBJECT,
+			READ_COUNT,
+			ATCHMNFL_ID,
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d') REGIST_DT
+		FROM
+			CNTRL_BBS
+		WHERE 
+			DELETE_YN = 'N'
+		AND
+			SUBJECT IS NOT NULL
+		AND
+			SUBJECT != ''
+		<if test='srchOpt != "" and srchOpt != null'>
+			<choose>
+				<when test='srchOpt == "1"'>
+					AND SUBJECT LIKE CONCAT('%', #{srchStr}, '%') 
+				</when>
+				<when test='srchOpt == "2"'>
+					AND CONTENTS LIKE CONCAT('%', #{srchStr}, '%')
+				</when>
+				<when test='srchOpt == "3"'>
+					AND (SUBJECT LIKE CONCAT('%', #{srchStr}, '%') || CONTENTS LIKE CONCAT('%', #{srchStr}, '%')) 
+				</when>
+			</choose>
+		</if>
+		ORDER BY SEQ
+		)A
+		ORDER BY ROWNUM DESC
+	<if test="recordCountPerPage != null and firstIndex != null">
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+	</if>
+	</select>
+	
+	<select id="bbsListCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM
+			CNTRL_BBS
+		WHERE
+			DELETE_YN = 'N'
+		AND
+			SUBJECT IS NOT NULL
+		AND
+			SUBJECT != ''
+			<if test='srchOpt != "" and srchOpt != null'>
+				<choose>
+					<when test='srchOpt == "1"'>
+						AND SUBJECT LIKE CONCAT('%', #{srchStr}, '%') 
+					</when>
+					<when test='srchOpt == "2"'>
+						AND CONTENTS LIKE CONCAT('%', #{srchStr}, '%')
+					</when>
+					<when test='srchOpt == "3"'>
+						AND (SUBJECT LIKE CONCAT('%', #{srchStr}, '%') || CONTENTS LIKE CONCAT('%', #{srchStr}, '%')) 
+					</when>
+				</choose>
+			</if>
+	</select>
+
+	<select id="bbsView" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.SEQ seq,
+			A.SUBJECT subject,
+			A.CONTENTS contents,
+			A.READ_COUNT readCount,
+			A.ATCHMNFL_ID atchmnflId,
+			DATE_FORMAT(A.REGIST_DT, '%Y.%m.%d') registDt
+		FROM
+			CNTRL_BBS A
+		WHERE
+			A.SEQ = #{seq}
+		AND
+			A.DELETE_YN = 'N'
+	</select>
+
+	<select id="bbsAttachFileList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.SEQ seq, 
+			A.ATCHMNFL_ID atchmnflId,
+			C.FILE_ID fileId, 
+			C.FILE_NAME fileName, 
+			C.SAVE_FILE_NAME saveFileName, 
+			C.FILE_PATH filePath, 
+			C.MIME_TYPE mimeType,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			CNTRL_BBS A  
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID  
+			LEFT JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+			1=1
+			<if test='seq != "" and seq != null'>
+				AND A.SEQ = #{seq}
+			</if>
+			<if test='srchOpt != "" and srchOpt != null'>
+				<choose>
+					<when test='srchOpt == "1"'>
+						AND A.SUBJECT LIKE CONCAT('%', #{srchStr}, '%') 
+					</when>
+					<when test='srchOpt == "2"'>
+						AND A.CONTENTS LIKE CONCAT('%', #{srchStr}, '%')
+					</when>
+					<when test='srchOpt == "3"'>
+						AND (A.SUBJECT LIKE CONCAT('%', #{srchStr}, '%') || A.CONTENTS LIKE CONCAT('%', #{srchStr}, '%')) 
+					</when>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="bbsAttachFileCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+	</select>
+	
+	<insert id="bbsThreadInsert" parameterType="zvl" useGeneratedKeys="true" keyProperty="seq" keyColumn="seq">
+		INSERT INTO CNTRL_BBS 
+		(
+			SUBJECT,
+			CONTENTS,
+			ATCHMNFL_ID,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES 
+		(  
+			#{subject}, 
+			#{contents}, 
+			#{atchmnfl_id}, 
+			NOW(), 
+			#{registId}
+		);
+		
+		<selectKey keyProperty="seq" resultType="String">
+			SELECT LAST_INSERT_ID() SEQ;
+		</selectKey>
+
+		<if test='file_ids != null and file_ids != ""'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnfl_id}, 
+				FILE_ID, 
+				'CNTRL_BBS', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{registId}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+	</insert>
+	
+	<update  id="bbsThreadUpdate" parameterType="zvl">
+		UPDATE CNTRL_BBS SET
+		<if test='subject != "" and subject != null'>
+			SUBJECT = #{subject},
+		</if>
+		<if test='contents != "" and contents != null'>
+			CONTENTS = #{contents},
+		</if>
+			ATCHMNFL_ID = #{atchmnfl_id},
+			UPDT_DT = NOW(),
+			UPDT_ID = #{registId}
+		WHERE
+			SEQ = #{seq};
+			  
+		<if test='file_ids != null and file_ids != ""'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnfl_id}, 
+				FILE_ID, 
+				'CNTRL_BBS', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{registId}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+	</update>
+	
+	<delete id="bbsAttachFileDelete" parameterType="zvl">
+		DELETE FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{file_id};
+
+		DELETE FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+			AND FILE_ID = #{file_id};
+	</delete>
+	
+	<update id="bbsAttachFileDeleteId" parameterType="zvl">
+		UPDATE CNTRL_BBS SET
+			ATCHMNFL_ID = ''
+		WHERE
+			SEQ = #{seq};
+	</update>
+	
+	<select id="bbsThreadCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			CNTRL_BBS
+		WHERE 
+			SEQ = #{seq}
+	</select>
+	
+	<delete id="bbsDelete" parameterType="zvl">
+		DELETE
+		FROM
+			CNTRL_BBS
+		WHERE
+			SEQ = #{seq}
+	</delete>
+	
+	<update id="bbsCountUpdate" parameterType="zvl">
+		UPDATE CNTRL_BBS SET
+			READ_COUNT = READ_COUNT + 1
+		WHERE
+			SEQ = #{seq};
+	</update>
+	
+	<select id="userList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+			@ROWNUM:=@ROWNUM+1 ROWNUM,
+			A.*
+		FROM
+		(
+			SELECT
+				A.USER_ID, 
+				A.USER_NM, 
+				A.INSTT_CD, 
+				B.INSTT_NM, 
+				A.CHRG_DUTY_CD,
+				A.DEPT,
+				A.CLSF,
+				A.RSPOFC,
+				A.MOBLPHON_NO, 
+				A.TEL_NO, 
+				A.LXTN_NO, 
+				A.EMAIL,
+				A.CONFM_YN,
+				A.STATUS_CD,
+				A.AUTHOR_ID,
+				C.CODE_NM STATUS_NM,
+				DATE_FORMAT(MAX(D.CONECT_DT), '%Y-%m-%d %H:%i:%s') LAST_CONNECT_DT,
+				A.REGIST_DT
+			FROM 
+				USER_MASTR A
+				LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD AND B.DELETE_YN = 'N'
+				LEFT JOIN CMMN_CD_MASTR C ON A.STATUS_CD = C.CODE AND C.DELETE_YN = 'N' AND C.UPPER_CD = 'SS00'
+				LEFT JOIN CONECT_HIST D ON A.USER_ID = D.USER_ID AND D.CONECT_CD = 'HC02'
+				LEFT JOIN AUTHORITY_MASTR E ON A.AUTHOR_ID = E.AUTHOR_ID AND E.DELETE_YN = 'N'
+			WHERE
+				A.DELETE_YN = 'N'
+				AND (A.CHRG_DUTY_CD LIKE '%IJ03%' OR A.CHRG_DUTY_CD LIKE '%IJ04%')
+			GROUP BY
+				A.USER_ID, 
+				A.USER_NM, 
+				A.INSTT_CD, 
+				B.INSTT_NM, 
+				A.CHRG_DUTY_CD,
+				A.DEPT,
+				A.CLSF,
+				A.RSPOFC,
+				A.MOBLPHON_NO, 
+				A.TEL_NO, 
+				A.LXTN_NO, 
+				A.EMAIL,
+				A.CONFM_YN,
+				A.STATUS_CD,
+				C.CODE_NM,
+				A.REGIST_DT
+			ORDER BY A.REGIST_DT
+		)A
+		ORDER BY ROWNUM DESC
+		<if test='excelFlag == null or excelFlag == ""'>
+			<if test="recordCountPerPage != null and firstIndex != null">
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+			</if>
+		</if>
+	</select>
+</mapper>

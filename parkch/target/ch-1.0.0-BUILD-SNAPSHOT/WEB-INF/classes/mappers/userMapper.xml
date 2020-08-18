@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="user">
+
+	<select id="userLogin" parameterType="Login" resultType="Login">
+		SELECT
+			idx, 
+			user_no, 
+			user_nm, 
+			user_id, 
+			user_pw,
+			user_telno,
+			user_email,
+			user_addr,
+			user_yn,
+			regist_dt,
+			login_dt
+		FROM 
+			user
+	    WHERE
+	    	user_id = #{userId}
+			<if test='password != null and password != ""'>
+			AND user_pw = #{password}
+			</if>	    	
+	</select>
+
+	<select id="userInfo" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			idx, 
+			user_no, 
+			user_nm, 
+			user_id, 
+			user_pw,
+			user_telno,
+			user_email,
+			user_addr,
+			user_yn,
+			regist_dt,
+			login_dt
+		FROM 
+			user
+	</select>
+
+</mapper>

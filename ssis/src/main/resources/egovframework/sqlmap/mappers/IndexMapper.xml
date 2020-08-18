@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="index">
+	
+	<!-- 점검항목구간별점수 START -->
+	<select id="selectCheckItemSctnScoreList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.ORDER_NO orderNo,
+			A.SCTN_SCORE sctnScore,
+			A.SCTN_NM sctnNm,
+			A.MNG_LEVEL_CD mngLevelCd,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn
+		FROM
+			CHECK_ITEM_SCTN_SCORE A 
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		AND
+			A.MNG_LEVEL_CD = #{mngLevelCd}
+		ORDER BY A.SCTN_SCORE DESC
+	</select>
+	
+	<insert id="insertCheckItemSctnScore" parameterType="zvl">
+		INSERT INTO CHECK_ITEM_SCTN_SCORE
+		(
+			ORDER_NO,
+			SCTN_SCORE,
+			SCTN_NM,
+			MNG_LEVEL_CD,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{orderNo},
+			#{sctnScore},
+			#{sctnNm},
+			#{mngLevelCd},
+			now(),
+			#{registId}
+		)
+	</insert>
+	
+	<delete id="deleteCheckItemSctnScore" parameterType="zvl">
+		DELETE
+		FROM
+			CHECK_ITEM_SCTN_SCORE
+		WHERE
+			ORDER_NO = #{orderNo}
+		AND
+			MNG_LEVEL_CD = #{mngLevelCd}
+	</delete>
+	<!-- 점검항목구간별점수 END -->
+	
+	<!-- 점검항목점수구분 START -->
+	<select id="selectCheckItemScoreSeList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.ORDER_NO orderNo,
+			A.SCORE_SE scoreSe,
+			A.SCORE_SE_NM scoreSeNm,
+			A.SCORE_SE_DC scoreSeDc,
+			A.SCORE score,
+			A.OUTPUT_ORDR outputOrdr,
+			A.MNG_LEVEL_CD mngLevelCd,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn
+		FROM
+			CHECK_ITEM_SCORE_SE A 
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		AND
+			A.MNG_LEVEL_CD = #{mngLevelCd}
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<insert id="insertCheckItemScoreSe" parameterType="zvl">
+		INSERT INTO CHECK_ITEM_SCORE_SE
+		(
+			ORDER_NO,
+			SCORE_SE,
+			SCORE_SE_NM,
+			SCORE_SE_DC,
+			<if test='"A" != scoreSe'>
+			SCORE,
+			OUTPUT_ORDR,
+			</if>
+			MNG_LEVEL_CD,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{orderNo},
+			#{scoreSe},
+			#{scoreSeNm},
+			#{scoreSeDc},
+			<if test='"A" != scoreSe'>
+			#{score},
+			#{outputOrdr},
+			</if>
+			#{mngLevelCd},
+			now(),
+			#{registId}
+		)
+	</insert>
+	
+	<delete id="deleteCheckItemScoreSe" parameterType="zvl">
+		DELETE
+		FROM
+			CHECK_ITEM_SCORE_SE
+		WHERE
+			ORDER_NO = #{orderNo}
+		AND
+			MNG_LEVEL_CD = #{mngLevelCd}
+	</delete>
+	<!-- 점검항목점수구분 END -->
+	
+	<!-- 관리수준 진단 START -->
+	<select id="selectMngLevelIndexMastrList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.ORDER_NO orderNo,
+			A.LCLAS lclas,
+			A.LCLAS_ORDER lclasOrder,
+      		B.lclasCnt,
+			A.MLSFC mlsfc,
+			A.MLSFC_ORDER mlsfcOrder,
+      		C.mlsfcCnt,
+			A.CHECK_ITEM checkItem,
+			A.HELP_COMMENT helpComment,
+			A.REMARK remark,
+			A.RESULT_SE resultSe,
+			A.EXCP_PERM_YN excpPermYn,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn
+		FROM
+			MNG_LEVEL_IDX_MASTR A 
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, COUNT(*) lclasCnt
+		          FROM MNG_LEVEL_IDX_MASTR
+		          GROUP BY ORDER_NO, LCLAS
+		        ) B
+		        ON A.ORDER_NO = B.ORDER_NO AND A.LCLAS = B.LCLAS
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, COUNT(*) mlsfcCnt
+		          FROM MNG_LEVEL_IDX_MASTR
+		          GROUP BY ORDER_NO, LCLAS, MLSFC
+		        ) C
+		        ON A.ORDER_NO = C.ORDER_NO AND A.LCLAS = C.LCLAS AND A.MLSFC = C.MLSFC
+		WHERE
+			A.ORDER_NO = #{orderNo}
+			<if test='null != lclas and "" != lclas'>
+			AND A.LCLAS = #{lclas}
+			</if>
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.INDEX_SEQ
+	</select>
+	
+	<select id="selectLclasOrderCnt" resultType="int">
+		SELECT CASE
+					WHEN MAX(LCLAS_ORDER) IS NULL
+					THEN 1
+					ELSE MAX(LCLAS_ORDER) + 1
+					END
+		FROM MNG_LEVEL_IDX_MASTR
+	</select>
+	
+	<insert id="insertMngLevelIdxMastr" parameterType="zvl">
+		INSERT INTO MNG_LEVEL_IDX_MASTR
+		(
+			ORDER_NO,
+			LCLAS,
+			LCLAS_ORDER,
+			MLSFC,
+			MLSFC_ORDER,
+			CHECK_ITEM,
+			CHECK_ITEM_ORDER,
+			HELP_COMMENT,
+			REMARK,
+			RESULT_SE,
+			EXCP_PERM_YN,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{orderNo},
+			#{lclas},
+			#{lclasOrder},
+			#{mlsfc},
+			#{mlsfcOrder},
+			#{checkItem},
+			#{checkItemOrder},
+			#{helpComment},
+			#{remark},
+			#{resultSe},
+			#{excpPermYn},
+			now(),
+			#{registId}
+		)
+	</insert>
+	
+	<delete id="deleteMngLevelIndexMastr" parameterType="zvl">
+		DELETE
+		FROM
+			MNG_LEVEL_IDX_MASTR
+		WHERE
+			1 =1
+		<if test='null != orderNo and "" != orderNo'>
+		AND
+			ORDER_NO = #{orderNo}
+		</if>
+		<if test='null != beforeLclas and "" != beforeLclas'>
+		AND
+			LCLAS = #{beforeLclas}
+		</if>
+		<if test='null != lclasOrder and "" != lclasOrder'>
+		AND
+			LCLAS_ORDER = #{lclasOrder}
+		</if>
+	</delete>
+	
+	<select id="selectMngLevelReqstCnt" resultType="int">
+		SELECT
+  			COUNT(*)
+		FROM
+  			MNG_LEVEL_IDX_MASTR A,
+        	MANAGE_LEVEL_REQST B
+		WHERE
+        	A.INDEX_SEQ = B.MNG_LEVEL_IDX_SEQ
+    	AND
+  			A.ORDER_NO = #{orderNo}
+	</select>
+	<!-- 관리수준 진단 END -->
+	
+	<!-- 관리수준 현황조사 START -->
+	<select id="selectStatusExaminIndexList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.ORDER_NO orderNo,
+			A.LCLAS lclas,
+			A.LCLAS_ORDER lclasOrder,
+      		B.lclasCnt,
+			A.MLSFC mlsfc,
+			A.MLSFC_ORDER mlsfcOrder,
+      		C.mlsfcCnt,
+			A.SCLAS sclas,
+			A.SCLAS_ORDER sclasOrder,
+			D.sclasCnt,
+			A.CHECK_ITEM checkItem,
+			A.HELP_COMMENT helpComment,
+			A.REMARK remark,
+			A.RESULT_SE resultSe,
+			A.EXCP_PERM_YN excpPermYn,
+			A.MNG_LEVEL_INDEX_SEQ as mngLevelIndexSeq,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn
+		FROM
+			STATUS_EXAMIN_IDX A 
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, COUNT(*) lclasCnt
+		          FROM STATUS_EXAMIN_IDX
+		          GROUP BY ORDER_NO, LCLAS
+		        ) B
+		        ON A.ORDER_NO = B.ORDER_NO AND A.LCLAS = B.LCLAS
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, COUNT(*) mlsfcCnt
+		          FROM STATUS_EXAMIN_IDX
+		          GROUP BY ORDER_NO, LCLAS, MLSFC
+		        ) C
+		        ON A.ORDER_NO = C.ORDER_NO AND A.LCLAS = C.LCLAS AND A.MLSFC = C.MLSFC
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, SCLAS, COUNT(*) sclasCnt
+		          FROM STATUS_EXAMIN_IDX
+		          GROUP BY ORDER_NO, LCLAS, MLSFC, SCLAS
+		        ) D
+		        ON A.ORDER_NO = D.ORDER_NO AND A.LCLAS = D.LCLAS AND A.MLSFC = D.MLSFC AND A.SCLAS = D.SCLAS
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.SCLAS_ORDER, A.INDEX_SEQ
+	</select>
+	
+	<select id="selectStatusExaminIndexDtlList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.ORDER_NO orderNo,
+			A.LCLAS lclas,
+			A.LCLAS_ORDER lclasOrder,
+			A.MLSFC mlsfc,
+			A.MLSFC_ORDER mlsfcOrder,
+			A.SCLAS sclas,
+			A.SCLAS_ORDER sclasOrder,
+			A.CHECK_ITEM checkItem,
+			A.HELP_COMMENT helpComment,
+			A.REMARK remark,
+			A.RESULT_SE resultSe,
+			A.EXCP_PERM_YN excpPermYn,
+			A.MNG_LEVEL_INDEX_SEQ as mngLevelIndexSeq,
+			B.dtlCheckItem,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn
+		FROM
+			STATUS_EXAMIN_IDX A
+		        LEFT OUTER JOIN(
+		          SELECT CHECK_ITEM dtlCheckItem, INDEX_SEQ, INDEX_DETAIL_SEQ
+		          FROM status_examin_idx_detail
+		          ORDER BY INDEX_DETAIL_SEQ
+		        ) B
+		        ON A.INDEX_SEQ = B.INDEX_SEQ
+		WHERE
+			A.ORDER_NO = #{orderNo}
+			<if test='null != lclas and "" != lclas'>
+			AND A.LCLAS = #{lclas}
+			</if>
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.SCLAS_ORDER, A.INDEX_SEQ, B.INDEX_DETAIL_SEQ
+	</select>
+	
+	<select id="selectMngLevelIndexSeqList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.INDEX_SEQ indexSeq,
+			A.CHECK_ITEM checkItem
+		FROM
+			MNG_LEVEL_IDX_MASTR A
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.INDEX_SEQ
+	</select>
+	
+	<select id="selectStatusLclasOrderCnt" parameterType="zvl" resultType="int">
+		SELECT CASE
+					WHEN MAX(LCLAS_ORDER) IS NULL
+					THEN 1
+					ELSE MAX(LCLAS_ORDER) + 1
+					END
+		FROM STATUS_EXAMIN_IDX
+		WHERE ORDER_NO = #{orderNo}
+	</select>
+	
+	<insert id="insertStatusExaminIdx" parameterType="zvl">
+		INSERT INTO STATUS_EXAMIN_IDX (
+			  ORDER_NO
+			, LCLAS
+			, LCLAS_ORDER
+			, MLSFC
+			, MLSFC_ORDER
+			, SCLAS
+			, SCLAS_ORDER
+			, CHECK_ITEM
+			, CHECK_ITEM_ORDER
+			, HELP_COMMENT
+			, REMARK
+			, EXCP_PERM_YN
+			, RESULT_SE
+			<if test='null != mngLevelIndexSeq and "" != mngLevelIndexSeq'>
+			, MNG_LEVEL_INDEX_SEQ
+			</if>
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+		  	  #{orderNo}
+			, #{lclas}
+			, #{lclasOrder}
+			, #{mlsfc}
+			, #{mlsfcOrder}
+			, #{sclas}
+			, #{sclasOrder}
+			, #{checkItem}
+			, #{checkItemOrder}
+			, #{helpComment}
+			, #{remark}
+			, #{excpPermYn}
+			, #{resultSe}
+			<if test='null != mngLevelIndexSeq and "" != mngLevelIndexSeq'>
+			, #{mngLevelIndexSeq}
+			</if>
+			, now()
+			, #{registId}
+		)
+		<selectKey keyProperty="indexSeq" resultType="int" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<insert id="insertStatusExaminIdxDetail" parameterType="zvl">
+		INSERT INTO STATUS_EXAMIN_IDX_DETAIL (
+			  INDEX_SEQ
+			, CHECK_ITEM
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+		  	  #{indexSeq}
+			, #{checkItem}
+			, now()
+			, #{registId}
+		)
+	</insert>
+	
+	<delete id="deleteStatusExaminIdx" parameterType="zvl">
+		DELETE
+		FROM
+			STATUS_EXAMIN_IDX
+		WHERE
+			1 = 1
+		<if test='null != orderNo and "" != orderNo'>
+		AND
+			ORDER_NO = #{orderNo}
+		</if>
+		<if test='null != beforeLclas and "" != beforeLclas'>
+		AND
+			LCLAS = #{beforeLclas}
+		</if>
+		<if test='null != lclasOrder and "" != lclasOrder'>
+		AND
+			LCLAS_ORDER = #{lclasOrder}
+		</if>
+	</delete>
+	
+	<delete id="deleteStatusExaminIdxDetail" parameterType="zvl">
+		DELETE A
+		FROM
+			STATUS_EXAMIN_IDX_DETAIL A
+		WHERE
+			EXISTS ( SELECT 1 
+							FROM STATUS_EXAMIN_IDX
+						  WHERE 1 = 1
+						  	<if test='null != orderNo and "" != orderNo'>
+							AND ORDER_NO = #{orderNo}
+							</if>
+							<if test='null != lclasOrder and "" != lclasOrder'>
+							AND LCLAS_ORDER = #{lclasOrder}
+							</if>
+							<if test='null != beforeLclas and "" != beforeLclas'>
+						  	AND LCLAS = #{beforeLclas}
+						  	</if>
+						  	AND A.INDEX_SEQ = INDEX_SEQ
+						)
+	</delete>
+	
+	<select id="selectStatusExaminEvalCnt" resultType="int">
+		SELECT
+  			COUNT(*)
+		FROM
+  			STATUS_EXAMIN_IDX A,
+  			STATUS_EXAMIN_IDX_DETAIL B,
+  			STATUS_EXAMIN_EVL_DETAIL C,
+  			STATUS_EXAMIN_EVL D
+		WHERE
+  			A.ORDER_NO = #{orderNo}
+		AND
+  			A.INDEX_SEQ = B.INDEX_SEQ
+		AND
+  			C.INDEX_SEQ = B.INDEX_SEQ
+		AND
+  			B.INDEX_DETAIL_SEQ = C.INDEX_DETAIL_SEQ
+  		AND 
+  			D.INDEX_SEQ = B.INDEX_SEQ
+	</select>
+	<!-- 관리수준 현황조사 END -->
+</mapper>
