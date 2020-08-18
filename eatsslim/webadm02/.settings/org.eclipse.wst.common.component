@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="webadm02">
-        <wb-resource deploy-path="/" source-path="/WEB_SOURCE" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <property name="context-root" value="webadm02"/>
-        <property name="java-output-path" value="/webadm02/WEB_SOURCE/WEB-INF/classes"/>
-    </wb-module>
-</project-modules>
