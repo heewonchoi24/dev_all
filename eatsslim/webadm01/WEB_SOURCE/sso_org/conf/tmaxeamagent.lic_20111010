@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license>
+	<signature>MCwCFGgdrqgai80P6+u5wn4+riSh1FvuAhRr1NfjlDLbzbXqNQx2vqSz86gmMw==</signature>
+	<info>
+		<creation>2011-08-23 20:23:23 +0900</creation>
+		<product>
+			<name>tmaxeamagent</name>
+			<description>java filter agent</description>
+			<version>3.0</version>
+			<restriction>
+				<name>hostname</name>
+				<value>PMOGAP1A</value>
+			</restriction>
+		</product>
+	</info>
+</license>

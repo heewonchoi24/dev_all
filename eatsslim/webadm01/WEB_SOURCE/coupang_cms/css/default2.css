@@ -1,0 +1,62 @@
+
+html { font-size: 12px}
+body { font-size: 12px}
+label { cursor:pointer}
+a:link, a:visited { text-decoration:none}
+a:hover, a:focus, a:active { text-decoration:underline}
+
+a, abbr, acronym, address, applet, article, aside, audio,
+b, blockquote, big, body,
+center, canvas, caption, cite, code, command,
+datalist, dd, del, details, dfn, dl, div, dt, 
+em, embed,
+fieldset, figcaption, figure, font, footer, form, 
+h1, h2, h3, h4, h5, h6, header, hgroup, html,
+i, iframe, img, ins,
+kbd, 
+keygen,
+label, legend, li, 
+meter,
+nav, menu,
+object, ol, output,
+p, pre, progress,
+q, 
+s, samp, section, small, span, source, strike, strong, sub, sup,
+table, tbody, tfoot, thead, th, tr, tdvideo, tt,
+u, ul, 
+var { margin:0; padding:0}
+
+h1, h2, h3, h4, h5, h6, th, td, table, input, button, select, textarea, sub{ font-size:1em}
+body, button, input, textarea, sub{ font-family:Arial}
+em, cite, address, optgroup { font-style:normal}
+kbd, samp, code { font-family:monospace}
+
+img, input, button, select, textarea { vertical-align:middle}
+ul, ol { list-style:none}
+img, fieldset { border:0}
+abbr, acronym { cursor:help; border-bottom:1px dotted black}
+/*table {	width:100%; border-spacing:0; border:0}*/
+.tableBorder {	border-spacing:1px; border:1px solid #cccccc;}
+.tableBorder th, tableBorder td { border:1px}
+/*
+table {	border-spacing:0; border:0}
+table th, table td { border:0}
+*/
+.table_prdt { width:100%;border-spacing:0; border:0}
+.table_prdt th, .table_prdt td { border:0}
+
+legend, hr { overflow:hidden; position:absolute; top:0; left:0}
+legend, hr, caption { visibility:hidden; font-size:0; width:0; height:0; line-height:0}
+
+/* Html5 Getting the new tags to behave */
+article, aside, audio, canvas, command, datalist, details, embed, figcaption, figure, footer, header, hgroup, keygen, meter, nav, output, progress, section, source, video{ display: block}
+mark, rp, rt, ruby, summary, time{ display: inline }
+ 
+/* clear float */
+.group:after{ content:"."; display:block; height:0; clear:both; visibility:hidden}
+.group{ display:inline-block}
+.group{ display:block}
+
+/* font_style */
+@font-face { font-family:ng; src:url('../font/NanumGothic.eot'); src:local('☺'), url('../font/NanumGothic.ttf') format(truetype);}
+@font-face { font-family:ng; src:local('☺'), url('../font/NanumGothic.ttf') format('truetype');}

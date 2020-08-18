@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mylibry">
+
+	<select id="mylibryBbsList04" parameterType="zvl" resultType="zvl">
+		SELECT     
+				SEQ,      
+				BBS_CD,     
+				CATEGORY,     
+				HEAD_CATEGORY_TEXT,     
+				SUBJECT,     
+				READ_COUNT,     
+				ATCHMNFL_ID,
+				IMG_NM,
+				REGIST_ID,     
+				DATE_FORMAT(REGIST_DT, '%Y.%m.%d') REGIST_DT,     
+				DELETE_YN    
+			FROM     GNRL_BBS    
+			WHERE     1=1
+				AND BBS_CD = 'BN04'    
+				AND DELETE_YN = 'N'     
+				AND (SUBJECT != '' AND SUBJECT IS NOT NULL)                      
+			ORDER BY SEQ DESC
+	</select>
+	
+	<select id="mylibryBbsFileList04" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.SEQ,
+			A.ATCHMNFL_ID,
+			C.FILE_ID,
+			C.FILE_NAME,
+			C.SAVE_FILE_NAME,
+			C.FILE_PATH,
+			C.MIME_TYPE,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			GNRL_BBS A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 1=1
+			AND BBS_CD = 'BN04'  
+	</select>
+
+	<select id="mylibryAttachFileList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.SEQ,
+			A.INSTT_FILE_SEQ,
+			A.INSTT_CD,
+			A.INSTT_NM,
+			A.REGIST_ID,
+			C.USER_NM,
+			DATE_FORMAT(A.REGIST_DT, "%Y-%m-%d %H:%i") REGIST_DT,
+			B.FILE_ID,
+			B.FILE_NAME,
+			B.SAVE_FILE_NAME,
+			B.FILE_PATH,
+			B.MIME_TYPE,
+			SUBSTRING(B.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			ATTACHMENT_PRIVATE_INSTT_FILE_MAP A
+			JOIN ATTACHMENT_FILE_MASTR B ON A.FILE_ID = B.FILE_ID
+			JOIN USER_MASTR C ON A.REGIST_ID = C.USER_ID
+		WHERE 1=1
+			AND A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<select id="mylibryAttachFile" parameterType="zvl" resultType="zvl">
+		SELECT 
+			SEQ,
+			INSTT_FILE_SEQ,
+			INSTT_CD,
+			INSTT_NM,
+			REGIST_ID,
+			DATE_FORMAT(REGIST_DT, "%Y-%m-%d %H:%i") REGIST_DT
+		FROM 
+			ATTACHMENT_PRIVATE_INSTT_FILE_MAP A
+		WHERE 1=1
+			AND SEQ = #{seq}
+	</select>
+	
+ 	<select id="mylibryBbsImg" parameterType="zvl" resultType="zvl">
+		SELECT 
+			BBS_SEQ,
+			BBS_CD,
+			IMG_ORIGINAL_NM,
+			IMG_NM,
+			IMG_PATH,
+			USE_YN,
+			REGIST_DT,
+			REGIST_ID
+		FROM
+			GNRL_BBS_IMG
+		WHERE 1=1
+		<if test='bbsSeq != null and bbsSeq != ""'>
+			AND BBS_SEQ = #{bbsSeq}
+		</if>
+	</select>
+	
+	<insert id="mylibryFileInsert" parameterType="zvl" useGeneratedKeys="true" keyProperty="instt_cd" keyColumn="instt_cd">
+
+		<if test='file_ids != null and file_ids != ""'>
+			INSERT ATTACHMENT_PRIVATE_INSTT_FILE_MAP 
+			(
+				FILE_ID, 
+				INSTT_CD,
+				INSTT_NM,
+				REGIST_ID, 
+				REGIST_DT 
+			)
+			SELECT
+				FILE_ID, 
+				#{instt_cd},
+				#{instt_nm}, 
+				#{user_id},
+				NOW()
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+		
+	</insert>
+
+	<delete id="mylibryFileDelete" parameterType="zvl">
+		DELETE FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{file_id};
+
+		DELETE FROM
+			ATTACHMENT_PRIVATE_INSTT_FILE_MAP
+		WHERE
+			FILE_ID = #{file_id};
+	</delete>
+	
+	<select id="mylibryAttachFileCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			FILE_ID = #{file_id}
+	</select>
+	
+	<select id="mylibryBsisSttusCnt" parameterType="zvl" resultType="zvl">
+		SELECT FILECNT,VIDEOCNT,SYSCNT  
+			FROM 
+			(
+			 (SELECT 
+					SUM(INDVDLINFO_CO) AS FILECNT
+				FROM
+					BSIS_STTUS_FILE
+				WHERE 1=1
+					AND INSTT_CD = #{insttCd}
+					AND ORDER_NO = #{orderNo} 
+				) A		
+			, (SELECT 
+					 IF(SUM(VIDEO_CO) IS NULL,0,SUM(VIDEO_CO)) AS VIDEOCNT
+				FROM
+					BSIS_STTUS_VIDEO
+				WHERE 1=1
+					AND INSTT_CD = #{insttCd}
+					AND ORDER_NO = #{orderNo} 
+				) B
+			,	(SELECT 
+					COUNT(*) AS SYSCNT
+				FROM
+					BSIS_STTUS_SYS
+				WHERE 1=1
+					AND INSTT_CD = #{insttCd}
+					AND ORDER_NO = #{orderNo} 
+				) C
+			)
+	</select>
+	
+	<select id="selectMngLevelResult" parameterType="zvl" resultType="zvl">
+		SELECT
+			  TOT_RESULT_SCORE1 totResultScore1
+			, TOT_RESULT_SCORE2 totResultScore2 		
+	     FROM MANAGE_LEVEL_GNRLZ_EVL 
+		WHERE ORDER_NO = #{orderNo}
+		  AND INSTT_CD = #{insttCd}
+	</select>
+	
+</mapper>

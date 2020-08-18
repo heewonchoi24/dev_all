@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<decorators>
+	<excludes>
+		<pattern>/**/error*</pattern>
+		<pattern>/initech/*</pattern>
+		<pattern>/admin/login.do</pattern>
+		<pattern>/smarteditor2-2.10.0/*</pattern>
+		<pattern>/admin/account/connectViewThread.do*</pattern>	
+		<pattern>/mngLevelRes/requestPopup.do*</pattern>		
+		<pattern>/mngLevelRes/reponsePopup.do*</pattern>	
+		<pattern>/mngLevelReq/popState.do*</pattern>	
+		<pattern>/mylibry/mylibry.do*</pattern>	
+		<pattern>/cjs/companionPopup.do*</pattern>	
+	</excludes>
+	
+	<!-- login, main, error Layout -->
+	<decorator name="loginLayout" page="/WEB-INF/jsp/layout/loginLayer.jsp">
+		<pattern>/user/idPwdFind.do</pattern>
+		<pattern>/login/*.do</pattern>
+		<pattern>/join/*.do</pattern>
+		<pattern>/index.jsp</pattern>
+		<pattern>/user/certLogin.do</pattern>
+		<pattern>/user/certUpdate.do</pattern>
+		<pattern>/user/certRegist.do</pattern>
+    </decorator>
+    
+    <decorator name="cjsLayout" page="/WEB-INF/jsp/layout/cjsLayout.jsp">
+		<pattern>/cjs/*.do</pattern>
+	</decorator>
+    
+	<!-- <decorator name="indexLayout" page="/WEB-INF/jsp/layout/indexLayout.jsp">
+		<pattern>/main.do</pattern>
+	</decorator> -->
+	
+	<decorator name="indexLayout" page="/WEB-INF/jsp/layout/indexMainLayout.jsp">
+		<pattern>/main.do</pattern>
+	</decorator>
+	
+	<decorator name="adminLayout" page="/WEB-INF/jsp/layout/adminLayout.jsp">
+		<pattern>/admin/**/*.do</pattern>
+	</decorator>
+	
+	<decorator name="frontLayout" page="/WEB-INF/jsp/layout/frontLayout.jsp">
+		<pattern>/*</pattern>
+	</decorator>		
+    
+	<!-- <decorator name="mainLayout" page="/WEB-INF/jsp/layout/mainLayout.jsp">
+		<pattern>/*</pattern>
+	</decorator> -->
+	
+	<!-- popUp Layout -->
+	<decorator name="popUpLayout" page="/WEB-INF/jsp/layout/popUpLayer.jsp">
+		<pattern>/**/*PopUp.do</pattern>
+		<pattern>/html/privacyPopUp.jsp</pattern>
+    </decorator>
+	
+	<decorator name="header" page="/WEB-INF/jsp/layout/header.jsp" /> 
+	<decorator name="footer" page="/WEB-INF/jsp/layout/footer.jsp" />
+	
+	<!-- mainLayout -->
+	<decorator name="mainTop" page="/WEB-INF/jsp/layout/mainTop.jsp" />
+	<decorator name="mainHeader" page="/WEB-INF/jsp/layout/mainHeader.jsp" />  
+	<decorator name="mainFooter" page="/WEB-INF/jsp/layout/mainFooter.jsp" />
+	<decorator name="mainBot" page="/WEB-INF/jsp/layout/mainBot.jsp" />
+	
+	<!-- frontLayout -->
+	<decorator name="frontTop" page="/WEB-INF/jsp/layout/frontTop.jsp" />
+	<decorator name="frontHeader" page="/WEB-INF/jsp/layout/frontHeader.jsp" />  
+	<decorator name="frontFooter" page="/WEB-INF/jsp/layout/frontFooter.jsp" />
+	<decorator name="frontBot" page="/WEB-INF/jsp/layout/frontBot.jsp" />
+	<decorator name="spot_sub" page="/WEB-INF/jsp/layout/spot_sub.jsp" />
+	
+	<decorator name="cjsHeader"  page="/WEB-INF/jsp/layout/cjsHeader.jsp" /> 
+	<decorator name="cjsTop"     page="/WEB-INF/jsp/layout/cjsTop.jsp" />
+	<decorator name="cjsSpotsub" page="/WEB-INF/jsp/layout/cjsSpotsub.jsp" />
+	<decorator name="cjsFooter"  page="/WEB-INF/jsp/layout/cjsFooter.jsp" />
+	
+	<decorator name="admTop" page="/WEB-INF/jsp/layout/admTop.jsp" />
+	<decorator name="admHeader" page="/WEB-INF/jsp/layout/admHeader.jsp" /> 
+	<decorator name="admSidebar" page="/WEB-INF/jsp/layout/admSidebar.jsp" />
+	<decorator name="admBot" page="/WEB-INF/jsp/layout/admBot.jsp" />
+	
+</decorators>

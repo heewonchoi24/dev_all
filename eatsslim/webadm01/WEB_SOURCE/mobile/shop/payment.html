@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="euc-kr">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+	<title>잇슬림</title>
+    <link rel="stylesheet" type="text/css" media="all" href="../common/css/eatsslim-ui.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="../common/css/style.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="../common/css/jquery.lightbox.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="../common/css/jquery-ui.css" />
+    <script type="text/javascript" src="../common/js/jquery.js"></script>
+    <script type="text/javascript" src="../common/js/jquery-ui.js"></script>
+	<script type="text/javascript" src="../common/js/jquery.cycle.js"></script>
+	<script type="text/javascript" src="../common/js/eatsslim.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.lightbox.js"></script>
+</head>
+<body>
+<div id="wrap">
+    <div class="ui-header" style="overflow:hidden;">
+        <a class="ui-btn-left ui-btn allmenu lightbox" href="../popup/allmenu.html?lightbox[iframe]=true&lightbox[width]=300&lightbox[height]=400"></a>
+        <h1 class="ui-title"><a href="../"></a></h1>
+        <a class="ui-btn-right ui-btn mypage" href="../shop/mypage/index.html"></a> <a class="ui-btn-right ui-btn cart" href="../shop/cart.html">
+        <div class="push">2</div>
+        </a>
+        <div class="ui-navbar ui-bar-a ui-shadow">
+          <ul class="ui-grid-d">
+            <li class="ui-block-a"> <a id="home" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../"> <span class="ui-btn-inner"> <span class="ui-btn-text">메인</span> <span class="ui-icon ui-icon-custom"></span> </span> </a> </li>
+            <li class="ui-block-b"> <a id="order" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../customer/service.html"> <span class="ui-btn-inner"> <span class="ui-btn-text">주문안내</span> <span class="ui-icon ui-icon-custom"></span> </span> </a> </li>
+            <li class="ui-block-c"> <a id="shop" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-active ui-btn-up-a" href="dietMeal.html"> <span class="ui-btn-inner"> <span class="ui-btn-text">SHOP</span> <span class="ui-icon ui-icon-custom"></span> </span> </a> </li>
+            <li class="ui-block-d"> <a id="event" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../event/"> <span class="ui-btn-inner"> <span class="ui-btn-text">이벤트</span> <span class="ui-icon ui-icon-custom"></span> </span> </a> </li>
+            <li class="ui-block-e"> <a id="delivery" class="ui-btn ui-btn-inline ui-btn-icon-top ui-btn-up-a" href="../delivery/delivery.html"> <span class="ui-btn-inner"> <span class="ui-btn-text">배송지역</span> <span class="ui-icon ui-icon-custom"></span> </span> </a> </li>
+            <div class="clear"></div>
+          </ul>
+        </div>
+        <!-- End ui-navbar -->
+    </div>
+    <!-- End ui-header -->
+    
+    <!-- Start Content -->
+    <div id="content">
+        <h1 class="ui-bar-a"><span class="ui-btn-inner"><span class="ui-btn-text">주문결제 완료</span></span></h1>
+           <h2 class="ui-title">주문리스트 확인<span class="ui-icon-right"></span></h2>
+               <dl class="itemlist">
+                   <dt style="width:70%;">다이어트 식사 3식/1개<p class="font-gray">(퀴진A+퀴진B+알라까르떼COOL)</p></dt>
+                       <dd style="width:30%;">104,400원</dd>
+               </dl>
+               <dl class="itemlist">
+                   <dt style="width:70%;">뷰티워터티/1BOX<p class="font-gray">(퀴진A+퀴진B+알라까르떼COOL)</p></dt>
+                       <dd style="width:30%;">24,000원</dd>
+               </dl>
+           <h2 class="ui-title">결제정보 확인<span class="ui-icon-right"></span></h2>
+               <dl class="itemlist">
+                   <dt style="width:70%;">결제방법</dt>
+                       <dd style="width:30%;">신용카드</dd>
+                   <dt style="width:70%;">주문일시</dt>
+                       <dd style="width:30%;">2013-10-01 08:03:10</dd>
+                   <dt style="width:70%;">상품합계금액</dt>
+                       <dd style="width:30%;">104,400원</dd>
+                   <dt style="width:70%;">상품할인</dt>
+                       <dd style="width:30%;">(-) 5,000원</dd>
+                   <p class="guide">다이어트식사 3식 상품할인 3,000원</p>
+                   <dt style="width:70%;">무료증정 할인</dt>
+                       <dd style="width:30%;">(-) 5,000원</dd>
+                   <p class="guide">무료증정쿠폰 1,000원</p>
+                   <dt style="width:70%;">전체 배송비</dt>
+                       <dd style="width:30%;">(+) 2,500원</dd>
+                </dl>       
+           <div class="divider"></div>
+           <dl class="itemlist redline">
+                <dt class="f16">총 결제금액</dt>
+                    <dd class="f16 font-orange">109,400원</dd>
+            </dl>
+            <div class="divider"></div>
+            
+           <h2 class="ui-title">배송정보 확인<span class="ui-icon-right"></span></h2> 
+           <h3 class="marb10 font-blue">일배상품 배송정보</h3>
+               <dl class="itemlist">
+                   <dt>수령인</dt>
+                       <dd>홍길동</dd>
+                   <dt>휴대폰</dt>
+                       <dd>010-1234-5678</dd>
+                   <dt>전화번호</dt>
+                       <dd>02-2345-6789</dd> 
+                   <dt>주소</dt>
+                       <dd>[155-050] 서울시 강남구 역삼동 256-25</dd>  
+                   <dt>출입문 비밀번호</dt>
+                       <dd>4567</dd> 
+                   <dt>배송유의사항</dt>
+                    <dd>부재시 경비실 보관요망</dd>
+                   <dt>송장번호</dt>
+                    <dd>대한통운(61784566)<b>배송중</b></dd>      
+               </dl>
+            <div class="divider"></div> 
+           
+           <h3 class="marb10 font-blue">택배상품 배송정보</h3>
+            <!--dl class="itemlist">
+                <dt>주문상품</dt>
+                    <dd>밸런스쉐이크/1BOX</dd>
+                <dt>주문금액</dt>
+                    <dd>24,000원</dd>
+                <dt>수령인</dt>
+                    <dd>홍길동</dd>
+                <dt>핸드폰</dt>
+                    <dd>010-1234-5678</dd>
+                <dt>전화번호</dt>
+                    <dd>02-224-6789</dd>
+                <dt>주소</dt>
+                    <dd>[151-505]서울특별시 관악구 신림동 00아파트 23동 201호</dd>
+                <dt>배송유의사항</dt>
+                    <dd>부재시 경비실 보관요망</dd>
+                <dt>송장번호</dt>
+                    <dd>대한통운(61784566)<b>배송중</b></dd>    
+           </dl-->
+           <p style="text-align:center">해당상품 없음</p>
+           <div class="divider"></div>   
+           <div class="grid-navi">
+                <table class="navi" border="0" cellspacing="10" cellpadding="0">
+                   <tr>
+                     <td><a href="#" class="ui-btn ui-btn-inline ui-btn-up-d"><span class="ui-btn-inner"><span class="ui-btn-text">계속 쇼핑하기</span></span></a></td>
+                     <td><a href="mypage/orderDetail.html" class="ui-btn ui-btn-inline ui-btn-up-b"><span class="ui-btn-inner"><span class="ui-btn-text">주문내역보기</span></span></a></td>
+                   </tr>
+                </table>
+            </div>
+          <div class="divider"></div>  
+  </div>
+    <!-- End Content -->
+    <div class="ui-footer">
+        <div class="marb10">
+            <a href="mypage/login.html" class="ui-btn ui-mini ui-btn-inline ui-btn-up-c"><span class="ui-btn-inner"><span class="ui-btn-text">로그인</span></span></a>
+            <a href="#" class="ui-btn ui-mini ui-btn-inline ui-btn-up-c"><span class="ui-btn-inner"><span class="ui-btn-text">PC버전보기</span></span></a>
+            <a href="../customer/notice.html" class="ui-btn ui-mini ui-btn-inline ui-btn-up-c"><span class="ui-btn-inner"><span class="ui-btn-text">고객센터</span></span></a>
+        </div>
+        <p>풀무원 건강생활(주) 서울 강남구 수서동 724번지 2층<br />대표이사:유창하 ㅣ 개인정보관리책임자:장종의</p>
+        <p class="copyright">&copy; 2013 PULMUONE HEALTH&LIVING Co., Ltd.</p>
+    </div>
+</div>
+</body>
+</html>

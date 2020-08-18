@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="system">
+	
+	<select id="selectFileSizeList" parameterType="zvl" resultType="zvl">
+		SELECT
+			AA.*
+		FROM
+		(
+			SELECT
+	     		  A.INSTT_CD insttCd
+	     		, A.INSTT_NM insttNm
+	     		, ROUND(IFNULL(E.MAX_FILE_SIZE, 1024 * 1024 * 50) / 1024 /1024,0) maxFileSize
+	     		, ROUND(IFNULL(E.MAX_TOTAL_FILE_SIZE, 1024 * 1024 * 1024) / 1024 /1024,0) maxTotalFileSize
+	     		, ROUND(IFNULL(SUM(D.FILE_SIZE),0) / 1024 /1024,0) totfileSize
+	     		, CASE
+					WHEN  A.UPDT_DT IS NOT NULL THEN DATE_FORMAT(A.UPDT_DT, '%Y.%m.%d %p %H:%i')
+					ELSE DATE_FORMAT(A.REGIST_DT, '%Y.%m.%d %p %H:%i')
+					END updateDt
+			FROM
+	      		INSTITUTION_MASTR A
+				LEFT JOIN MANAGE_LEVEL_REQST B ON A.INSTT_CD = B.INSTT_CD AND B.ORDER_NO = #{searchOrderNo}
+				LEFT JOIN ATTACHMENT_FILE_MAP C ON C.ATCHMNFL_ID = B.ATCHMNFL_ID
+				LEFT JOIN ATTACHMENT_FILE_MASTR D ON D.FILE_ID = C.FILE_ID
+				LEFT JOIN INSTITUTION_FILE_MASTR E ON A.INSTT_CD = E.INSTT_CD AND E.ORDER_NO = #{searchOrderNo}
+			WHERE
+				A.DELETE_YN = 'N'
+		   		<if test='null != searchInsttClCd and "" != searchInsttClCd'>
+				AND A.INSTT_CL_CD = #{searchInsttClCd}
+				</if>
+				<if test='null != searchInsttCd and "" != searchInsttCd'>
+				AND A.INSTT_CD = #{searchInsttCd}
+				</if>
+			GROUP BY
+				  A.INSTT_CD
+	      		, A.INSTT_NM
+	      		, E.UPDT_DT
+	      		, E.REGIST_DT
+			ORDER BY A.OUTPUT_ORDR
+		) AA
+	<if test="recordCountPerPage != null and firstIndex != null">
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+	</if>
+	</select>
+	
+	<select id="selectFileSizeListCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(
+			SELECT
+	     		  A.INSTT_CD
+	      		, A.INSTT_NM
+			FROM
+	      		INSTITUTION_MASTR A
+				LEFT JOIN MANAGE_LEVEL_REQST B ON A.INSTT_CD = B.INSTT_CD AND B.ORDER_NO = #{searchOrderNo}
+				LEFT JOIN ATTACHMENT_FILE_MAP C ON C.ATCHMNFL_ID = B.ATCHMNFL_ID
+				LEFT JOIN ATTACHMENT_FILE_MASTR D ON D.FILE_ID = C.FILE_ID
+				LEFT JOIN INSTITUTION_FILE_MASTR E ON A.INSTT_CD = E.INSTT_CD AND E.ORDER_NO = #{searchOrderNo}
+			WHERE
+				A.DELETE_YN = 'N'
+		   		<if test='null != searchInsttClCd and "" != searchInsttClCd'>
+				AND A.INSTT_CL_CD = #{searchInsttClCd}
+				</if>
+				<if test='null != searchInsttCd and "" != searchInsttCd'>
+				AND A.INSTT_CD = #{searchInsttCd}
+				</if>
+			GROUP BY
+				  A.INSTT_CD
+	      		, A.INSTT_NM
+	      	) AA
+	</select>
+	
+	<insert id="insertFileSize" parameterType="zvl">
+		INSERT INTO INSTITUTION_FILE_MASTR 
+		(
+			INSTT_CD,
+			ORDER_NO,
+			MAX_FILE_SIZE,
+			MAX_TOTAL_FILE_SIZE,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES 
+		( 
+			#{insttCd}, 
+			#{orderNo}, 
+			#{maxFileSize}, 
+			#{maxTotalFileSize}, 
+			NOW(), 
+			#{userId}
+		)
+	</insert>
+	
+	<update  id="updateFileSize" parameterType="zvl">
+		UPDATE INSTITUTION_FILE_MASTR SET
+			MAX_FILE_SIZE = #{maxFileSize},
+			MAX_TOTAL_FILE_SIZE = #{maxTotalFileSize},
+			UPDT_DT = NOW(),
+			UPDT_ID = #{userId}
+		WHERE
+			ORDER_NO = #{orderNo}
+		AND
+			INSTT_CD = #{insttCd}
+	</update>
+	
+	<update  id="updateAllFileSize" parameterType="zvl">
+		DELETE
+		FROM
+			INSTITUTION_FILE_MASTR
+		WHERE
+			ORDER_NO = #{orderNo}
+		;
+		
+		INSERT INTO INSTITUTION_FILE_MASTR 
+		(
+			INSTT_CD,
+			ORDER_NO,
+			MAX_FILE_SIZE,
+			MAX_TOTAL_FILE_SIZE,
+			REGIST_DT,
+			REGIST_ID
+		)
+		SELECT
+			  INSTT_CD
+			, #{orderNo}
+			, #{maxFileSize}
+			, #{maxTotalFileSize}
+			, NOW() 
+			, #{userId}
+		FROM
+			INSTITUTION_MASTR
+		WHERE
+			DELETE_YN = 'N'
+	</update>
+</mapper>

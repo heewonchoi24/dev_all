@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cjsCntrl">
+
+	<select id="selectCntrlList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+		
+		SELECT
+			  AA.rowNum
+			, AA.insttCd
+			, AA.status
+			, AA.atchmnflId
+			, AA.returnResn
+			, AA.registDt
+			, AA.registId
+			, AA.updtId
+			, AA.deleteDt
+			, AA.deleteId
+			, AA.deleteYn
+			, AA.insttNm
+			, AA.userNm
+			, AA.telNo
+			, AA.moblphonNo
+		FROM
+			(
+			SELECT
+				  @ROWNUM:=@ROWNUM+1 rowNum
+	  			, A.INSTT_CD insttCd
+	  			, A.STATUS status
+	  			, A.ATCHMNFL_ID atchmnflId
+	  			, A.RETURN_RESN returnResn
+	  			, DATE_FORMAT(A.REGIST_DT, '%Y.%m.%d') registDt
+				, A.REGIST_ID registId
+				, A.UPDT_DT updtDt
+				, A.UPDT_ID updtId
+				, A.DELETE_DT deleteDt
+				, A.DELETE_ID deleteId
+				, A.DELETE_YN deleteYn
+				, B.INSTT_NM insttNm
+				, C.USER_NM userNm
+	  			, C.TEL_NO telNo
+	  			, C.MOBLPHON_NO moblphonNo
+			FROM
+	  			CONTROL_MASTR A
+	  			LEFT OUTER JOIN INSTITUTION_MASTR B
+	  			ON A.INSTT_CD = B.INSTT_CD
+				LEFT OUTER JOIN USER_MASTR C
+				ON A.REGIST_ID = C.USER_ID
+			WHERE
+	  			B.DELETE_YN = 'N'
+			<if test='srchOpt != "" and srchOpt != null'>
+				<choose>
+					<when test='srchOpt == "1"'>
+						AND USER_NM LIKE CONCAT('%', #{srchStr}, '%') 
+					</when>
+					<when test='srchOpt == "2"'>
+						AND INSTT_NM LIKE CONCAT('%', #{srchStr}, '%')
+					</when>
+					<when test='srchOpt == "3"'>
+						AND TEL_NO LIKE CONCAT('%', #{srchStr}, '%')
+					</when>		
+					<when test='srchOpt == "4"'>
+						AND MOBLPHON_NO LIKE CONCAT('%', #{srchStr}, '%')
+					</when>							
+				</choose>
+			</if>	  			
+	  		ORDER BY A.REGIST_DT
+	  		) AA
+		ORDER BY AA.rowNum DESC
+	<if test="recordCountPerPage != null and firstIndex != null">
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+	</if>
+	</select>
+	
+	<select id="selectCntrlCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+  			CONTROL_MASTR A
+		WHERE
+  			A.DELETE_YN = 'N'
+		<if test='null != insttCd and "" != insttCd'>
+			AND A.INSTT_CD = #{insttCd}			
+		</if>
+	</select>
+	
+	<select id="selectCntrlFileList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.INSTT_CD insttCd, 
+			A.ATCHMNFL_ID atchmnflId,
+			C.FILE_ID fileId, 
+			C.FILE_NAME fileName, 
+			C.SAVE_FILE_NAME saveFileName, 
+			C.FILE_PATH filePath, 
+			C.MIME_TYPE mimeType,
+			SUBSTRING(C.FILE_EXTSN,1,3) fileExtsn
+		FROM 
+			CONTROL_MASTR A  
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID  
+			LEFT JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE
+  			A.DELETE_YN = 'N'
+		<if test='null != insttCd and "" != insttCd'>
+			AND A.INSTT_CD = #{insttCd}			
+		</if>
+	</select>
+	
+	<update id="updateCntrlStatus" parameterType="zvl">
+		UPDATE
+			CONTROL_MASTR
+		SET
+		  	  STATUS = #{status}
+			, RETURN_RESN = #{returnResn}
+			, UPDT_ID = #{updtId}
+			, UPDT_DT = NOW()
+		WHERE
+			INSTT_CD = #{insttCd};
+		
+		<if test='"SS01" != status'>
+			UPDATE
+				INSTITUTION_MASTR
+			SET
+				  UPDT_ID = #{updtId}
+				, UPDT_DT = NOW()
+				<if test='"SS03" == status'>
+				, CNTRL_PREARNGE_YN = 'Y'
+				</if>
+				<if test='"SS02" == status'>
+				, CNTRL_PREARNGE_YN = 'N'
+				</if>
+			WHERE
+				INSTT_CD = #{insttCd};
+		</if>
+	</update>
+	
+	<select id="selectCntrl" parameterType="zvl" resultType="zvl">
+		SELECT
+  			  A.INSTT_CD insttCd
+  			, A.CNTRL_PREARNGE_YN cntrlPrearngeYn
+  			, B.STATUS status
+  			, B.ATCHMNFL_ID atchmnflId
+  			, B.RETURN_RESN returnResn
+  			, DATE_FORMAT(B.REGIST_DT, '%Y.%m.%d') registDt
+			, B.REGIST_ID registId
+			, B.UPDT_DT updtDt
+			, B.UPDT_ID updtId
+			, B.DELETE_DT deleteDt
+			, B.DELETE_ID deleteId
+			, B.DELETE_YN deleteYn
+		FROM
+  			INSTITUTION_MASTR A
+  			LEFT OUTER JOIN CONTROL_MASTR B
+  			ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+  			A.DELETE_YN = 'N'
+  		AND
+  			A.INSTT_CD = #{insttCd}
+	</select>
+	
+	<insert id="insertCntrl" parameterType="zvl" useGeneratedKeys="true" keyProperty="seq" keyColumn="seq">
+		INSERT INTO CONTROL_MASTR 
+		(
+			INSTT_CD,
+			ATCHMNFL_ID,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES 
+		(  
+			#{insttCd}, 
+			#{atchmnfl_id}, 
+			NOW(), 
+			#{registId}
+		);
+		
+		<selectKey keyProperty="seq" resultType="String">
+			SELECT LAST_INSERT_ID() SEQ;
+		</selectKey>
+
+		<if test='file_ids != null'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnfl_id}, 
+				FILE_ID, 
+				'CONTROL_MASTR', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{registId}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+	</insert>
+	
+	<update  id="updateCntrlFile" parameterType="zvl">
+		UPDATE CONTROL_MASTR SET
+			STATUS = '',
+			UPDT_DT = NOW(),
+			UPDT_ID = #{updtId}
+		WHERE
+			INSTT_CD = #{insttCd};
+			  
+		<if test='file_ids != null'>
+			INSERT ATTACHMENT_FILE_MAP 
+			(
+				ATCHMNFL_ID, 
+				FILE_ID, 
+				TABLE_NM, 
+				TABLE_ID, 
+				REGIST_DT, 
+				REGIST_ID, 
+				DELETE_YN
+			)
+			SELECT
+				#{atchmnfl_id}, 
+				FILE_ID, 
+				'CONTROL_MASTR', 
+				LAST_INSERT_ID(), 
+				NOW(), 
+				#{updtId}, 
+				'N'
+			FROM
+				ATTACHMENT_FILE_MASTR
+			WHERE
+				FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		</if>
+	</update>
+	
+	<delete id="deleteCntrlAttachFile" parameterType="zvl">
+		DELETE FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{file_id};
+
+		DELETE FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+			AND FILE_ID = #{file_id};
+	</delete>
+	
+	<delete id="deleteCntrl" parameterType="zvl">
+		DELETE
+		FROM
+			CONTROL_MASTR
+		WHERE
+			INSTT_CD = #{insttCd}
+	</delete>
+	
+	<select id="selectCntrlAttachFileCnt" parameterType="zvl" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnfl_id}
+	</select>
+</mapper>

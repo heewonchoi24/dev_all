@@ -1,0 +1,1 @@
+<%@ include file="/mobile/shop/mypage/__ajax_calendar_changeschedule_db.jsp"%>

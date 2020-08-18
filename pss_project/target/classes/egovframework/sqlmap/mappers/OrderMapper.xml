@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="order">
+	
+	<select id="listThread" parameterType="zvl" resultType="zvl">
+		SELECT
+			X.ORDER_NO			AS SEQ,
+			X.YEAR			    AS YEAR,
+			X.MNG_LEVEL_REGIST_BGNDE AS MNG_LEVEL_REGIST_BGNDE,
+			X.MNG_LEVEL_REGIST_ENDDE AS MNG_LEVEL_REGIST_ENDDE,
+			X.MNG_LEVEL_REGIST_BGNDE2 AS MNG_LEVEL_REGIST_BGNDE2,
+			X.MNG_LEVEL_REGIST_ENDDE2 AS MNG_LEVEL_REGIST_ENDDE2,
+			X.MNG_LEVEL_EVL_BGNDE AS MNG_LEVEL_EVL_BGNDE,
+			X.MNG_LEVEL_EVL_ENDDE AS MNG_LEVEL_EVL_ENDDE,
+			X.MNG_LEVEL_FOBJCT_BGNDE AS MNG_LEVEL_FOBJCT_BGNDE,
+			X.MNG_LEVEL_FOBJCT_ENDDE AS MNG_LEVEL_FOBJCT_ENDDE,
+			X.MNG_LEVEL_RESULT_BGNDE AS MNG_LEVEL_RESULT_BGNDE,
+			X.MNG_LEVEL_RESULT_ENDDE AS MNG_LEVEL_RESULT_ENDDE,
+			X.STTUS_EXAMIN_REGIST_BGNDE as STTUS_EXAMIN_REGIST_BGNDE,
+			X.STTUS_EXAMIN_REGIST_ENDDE as STTUS_EXAMIN_REGIST_ENDDE,
+<!-- 			X.STTUS_EXAMIN_FOBJCT_BGNDE as STTUS_EXAMIN_FOBJCT_BGNDE,
+			X.STTUS_EXAMIN_FOBJCT_ENDDE as STTUS_EXAMIN_FOBJCT_ENDDE, -->
+			X.STTUS_EXAMIN_RESULT_BGNDE as STTUS_EXAMIN_RESULT_BGNDE,
+			X.STTUS_EXAMIN_RESULT_ENDDE as STTUS_EXAMIN_RESULT_ENDDE,
+			X.CHECK_ITEM_SCORE_FRMLA,
+			DATE_FORMAT(X.REGIST_DT, '%Y.%m.%d') AS REGIST_DT,
+			X.REGIST_ID		AS REGIST_ID,
+			DATE_FORMAT(X.UPDT_DT, '%Y.%m.%d') 	AS UPDT_DT,
+			X.UPDT_ID		AS UPDT_ID,
+			X.DELETE_YN,
+			X.CURRENT_YN,
+			CASE
+			WHEN  X.UPDT_DT IS NOT NULL THEN DATE_FORMAT(X.UPDT_DT, '%Y.%m.%d')
+			ELSE DATE_FORMAT(X.REGIST_DT, '%Y.%m.%d')
+			END updateDt
+		FROM
+			ORDER_MASTR	AS X
+		ORDER BY X.ORDER_NO
+		<if test="recordCountPerPage != null and recordCountPerPage != ''
+			and firstIndex != null and firstIndex != ''">
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select>
+
+	<select id="selectOrderNo" resultType="zvl">
+		SELECT 
+			ORDER_NO as orderNo
+			, YEAR  as year
+			, MNG_LEVEL_REGIST_BGNDE as mngLevelRegistBgnde
+			, MNG_LEVEL_REGIST_ENDDE as mngLevelRegistEndde
+			, MNG_LEVEL_REGIST_BGNDE2 as mngLevelRegistBgnde2
+			, MNG_LEVEL_REGIST_ENDDE2 as mngLevelRegistEndde2
+			, MNG_LEVEL_EVL_BGNDE as mngLevelEvlBgnde
+			, MNG_LEVEL_EVL_ENDDE as mngLevelEvlEndde
+			, MNG_LEVEL_FOBJCT_BGNDE as mngLevelFobjctBgnde
+			, MNG_LEVEL_FOBJCT_ENDDE as mngLevelFobjctEndde
+			, MNG_LEVEL_RESULT_BGNDE as mngLevelResultBgnde
+			, MNG_LEVEL_RESULT_ENDDE as mngLevelResultEndde
+			, STTUS_EXAMIN_REGIST_BGNDE as sttusExaminRegistBgnde
+			, STTUS_EXAMIN_REGIST_ENDDE as sttusExaminRegistEndde
+<!-- 			, STTUS_EXAMIN_FOBJCT_BGNDE as sttusExaminFobjctBgnde
+			, STTUS_EXAMIN_FOBJCT_ENDDE as sttusExaminFobjctEndde -->
+			, STTUS_EXAMIN_RESULT_BGNDE as sttusExaminResultBgnde
+			, STTUS_EXAMIN_RESULT_ENDDE as sttusExaminResultEndde
+			, CHECK_ITEM_SCORE_FRMLA as checkItemScoreFrmla
+			, CURRENT_YN
+			, REGIST_DT as registDt
+			, REGIST_ID as registId
+			, UPDT_DT as updtDt
+			, UPDT_ID as updtId
+			,CONCAT
+			 (
+				  IF(NOW() BETWEEN MNG_LEVEL_REGIST_BGNDE AND MNG_LEVEL_REGIST_ENDDE, 'A', '' ) 
+				, IF(NOW() BETWEEN MNG_LEVEL_REGIST_BGNDE2 AND MNG_LEVEL_REGIST_ENDDE2, 'H', '' ) 
+				, IF(NOW() BETWEEN MNG_LEVEL_EVL_BGNDE AND MNG_LEVEL_EVL_ENDDE, 'Y', '' ) 
+				, IF(NOW() BETWEEN MNG_LEVEL_FOBJCT_BGNDE AND MNG_LEVEL_FOBJCT_ENDDE, 'C', '' ) 
+				, IF(NOW() BETWEEN MNG_LEVEL_RESULT_BGNDE AND MNG_LEVEL_RESULT_ENDDE, 'D', '' ) 		
+				, IF(NOW() <![CDATA[ < ]]> MNG_LEVEL_REGIST_BGNDE, 'E', '' ) 
+				, IF(NOW() <![CDATA[ > ]]> MNG_LEVEL_RESULT_ENDDE, 'F', '' ) 
+			) periodCode
+		FROM 
+			ORDER_MASTR
+		WHERE
+			ORDER_NO	= #{orderNo}
+	</select>
+	
+	<select id="cntThread" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(ORDER_NO)
+		FROM
+			ORDER_MASTR
+		WHERE
+		    DELETE_YN = 'N'
+	</select>
+	
+	<insert id="registThread" parameterType="zvl">
+		INSERT INTO ORDER_MASTR
+		(
+			ORDER_NO,
+			YEAR,
+			MNG_LEVEL_REGIST_BGNDE,
+			MNG_LEVEL_REGIST_ENDDE,
+			MNG_LEVEL_REGIST_BGNDE2,
+			MNG_LEVEL_REGIST_ENDDE2,
+			MNG_LEVEL_EVL_BGNDE,
+			MNG_LEVEL_EVL_ENDDE,
+			MNG_LEVEL_FOBJCT_BGNDE,
+			MNG_LEVEL_FOBJCT_ENDDE,
+			MNG_LEVEL_RESULT_BGNDE,
+			MNG_LEVEL_RESULT_ENDDE,
+			STTUS_EXAMIN_REGIST_BGNDE,
+			STTUS_EXAMIN_REGIST_ENDDE,
+			<!-- STTUS_EXAMIN_FOBJCT_BGNDE,
+			STTUS_EXAMIN_FOBJCT_ENDDE, -->
+			STTUS_EXAMIN_RESULT_BGNDE,
+			STTUS_EXAMIN_RESULT_ENDDE,
+			CHECK_ITEM_SCORE_FRMLA,
+			CURRENT_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		VALUES
+		(
+			#{orderNo},
+			#{orderNo},
+			#{mngLevelRegistBgnde},
+			#{mngLevelRegistEndde},
+			#{mngLevelRegistBgnde2},
+			#{mngLevelRegistEndde2},
+			#{mngLevelEvlBgnde},
+			#{mngLevelEvlEndde},
+			#{mngLevelFobjctBgnde},
+			#{mngLevelFobjctEndde},
+			#{mngLevelResultBgnde},
+			#{mngLevelResultEndde},
+			#{sttusExaminRegistBgnde},
+			#{sttusExaminRegistEndde},
+			<!-- #{sttusExaminFobjctBgnde},
+			#{sttusExaminFobjctEndde}, -->
+			#{sttusExaminResultBgnde},
+			#{sttusExaminResultEndde},
+			#{checkItemScoreFrmla},
+			#{currentYN},
+			now(),
+			#{user_id},
+			'N'
+		);
+		
+		<selectKey keyProperty="order_no" resultType="String">
+			SELECT LAST_INSERT_ID() ORDER;
+		</selectKey>
+		
+		<if test='currentYN != null and currentYN != "" and currentYN == "Y"'>
+			UPDATE ORDER_MASTR SET
+				CURRENT_YN = 'N'
+			WHERE ORDER_NO != LAST_INSERT_ID();
+		</if>
+	</insert>
+
+	<delete id="deleteOrder" parameterType="zvl">
+		DELETE FROM ORDER_MASTR  WHERE  ORDER_NO	= #{orderNo}
+	</delete>
+
+	<update id="updateOrder" parameterType="zvl">
+		UPDATE ORDER_MASTR SET
+			MNG_LEVEL_REGIST_BGNDE = #{mngLevelRegistBgnde},
+			MNG_LEVEL_REGIST_ENDDE = #{mngLevelRegistEndde},
+			MNG_LEVEL_REGIST_BGNDE2 = #{mngLevelRegistBgnde2},
+			MNG_LEVEL_REGIST_ENDDE2 = #{mngLevelRegistEndde2},
+			MNG_LEVEL_EVL_BGNDE = #{mngLevelEvlBgnde},
+			MNG_LEVEL_EVL_ENDDE = #{mngLevelEvlEndde},
+			MNG_LEVEL_FOBJCT_BGNDE = #{mngLevelFobjctBgnde},
+			MNG_LEVEL_FOBJCT_ENDDE = #{mngLevelFobjctEndde},
+			MNG_LEVEL_RESULT_BGNDE = #{mngLevelResultBgnde},
+			MNG_LEVEL_RESULT_ENDDE = #{mngLevelResultEndde},
+			STTUS_EXAMIN_REGIST_BGNDE = #{sttusExaminRegistBgnde},
+			STTUS_EXAMIN_REGIST_ENDDE = #{sttusExaminRegistEndde},
+			<!-- STTUS_EXAMIN_FOBJCT_BGNDE = #{sttusExaminFobjctBgnde},
+			STTUS_EXAMIN_FOBJCT_ENDDE = #{sttusExaminFobjctEndde}, -->
+			STTUS_EXAMIN_RESULT_BGNDE = #{sttusExaminResultBgnde},
+			STTUS_EXAMIN_RESULT_ENDDE = #{sttusExaminResultEndde},
+			CHECK_ITEM_SCORE_FRMLA = #{checkItemScoreFrmla},
+			CURRENT_YN = #{currentYN},
+			UPDT_DT	= now(),
+			UPDT_ID	= #{user_id}
+		WHERE
+			ORDER_NO	= #{orderNo};
+			
+		<if test='currentYN != null and currentYN != "" and currentYN == "Y"'>
+			UPDATE ORDER_MASTR SET
+				CURRENT_YN = 'N'
+			WHERE ORDER_NO != #{orderNo};
+		</if>
+	</update>
+	
+	<!-- 연간일정 START -->
+	<select id="selectFyerSchdulList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			  A.SEQ as seq
+			, A.MNG_LEVEL_CD  as mngLevelCd
+			, A.YYYY as yyyy
+			, A.MM as mm
+			, A.MNG_LEVEL_BGNDE as mngLevelBgnde
+			, A.MNG_LEVEL_ENDDE as mngLevelEndde
+			, A.MNG_LEVEL_TITLE as mngLevelTitle
+			, A.MNG_LEVEL_CN as mngLevelCn
+			, A.LINK as link
+			, A.REGIST_DT registDt
+			, A.REGIST_ID registId
+			, A.UPDT_DT updtDt
+			, A.UPDT_ID updtId
+			, A.DELETE_DT deleteDt
+			, A.DELETE_ID deleteId
+			, A.DELETE_YN deleteYn
+		FROM 
+			FYER_SCHDUL A
+		WHERE
+			A.YYYY	= #{yyyy}
+		AND
+			A.MNG_LEVEL_CD = #{mngLevelCd}
+		<if test="fyerSeq != null and fyerSeq != ''">
+		AND
+			A.SEQ = #{fyerSeq}
+		</if>
+		ORDER BY
+		<if test="mngLevelCd == 'ML03'">
+			A.MM
+		</if>
+		<if test="mngLevelCd != 'ML03'">
+			A.MNG_LEVEL_BGNDE
+		</if>
+	</select>
+	
+	<insert id="insertFyerSchdul" parameterType="zvl">
+		INSERT INTO FYER_SCHDUL
+		(
+			  MNG_LEVEL_CD
+			, YYYY
+			, MM
+			, MNG_LEVEL_BGNDE
+			, MNG_LEVEL_ENDDE
+			, MNG_LEVEL_TITLE
+			, MNG_LEVEL_CN
+			, LINK
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+			  #{mngLevelCd}
+			, #{yyyy}
+			, #{mm}
+			, #{mngLevelBgnde}
+			, #{mngLevelEndde}
+			, #{mngLevelTitle}
+			, #{mngLevelCn}
+			, #{link}
+			, now()
+			, #{registId}
+		)
+	</insert>
+	
+	<update id="updateFyerSchdul" parameterType="zvl">
+		UPDATE FYER_SCHDUL SET
+			  MM = #{mm}
+			, MNG_LEVEL_BGNDE = #{mngLevelBgnde}
+			, MNG_LEVEL_ENDDE = #{mngLevelEndde}
+			, MNG_LEVEL_TITLE = #{mngLevelTitle}
+			, MNG_LEVEL_CN    = #{mngLevelCn}
+			, LINK 			  = #{link}
+			, UPDT_DT		  = now()
+			, UPDT_ID		  = #{updtId}
+		WHERE
+			SEQ	= #{seq}
+	</update>
+	
+	<delete id="deleteFyerSchdul" parameterType="zvl">
+		DELETE
+		FROM
+			FYER_SCHDUL
+		WHERE
+			SEQ	= #{seq}
+	</delete>
+	<!-- 연간일정 START -->
+</mapper>

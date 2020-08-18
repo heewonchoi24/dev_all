@@ -1,0 +1,161 @@
+/*
+* Eatsslim 2013
+*/
+
+    .container                                  { position:relative; width: 1100px; margin: 0 auto; min-height:600px; padding: 0; text-align:left;}
+    .container .column,
+    .container .columns                         { float: left; display: inline; margin-right: 35px; }
+	.row-ten                                      { margin-bottom: 10px; }
+    .row, .col                                        { margin-bottom: 20px;}
+	.row-thirty                                  { margin-bottom: 30px; }
+	.row-thirtyfive                                  { margin-bottom: 35px; }
+	.row-fourty                                  { margin-bottom: 40px; }
+	.row-fifty                                  { margin-bottom: 50px; }
+	.row-fourteen                                  { margin-bottom: 14px; }
+	.top-seventeen                                  {margin-top: 17px; }
+
+    /* Nested Column Classes */
+    .column.alpha, .columns.alpha               { margin-left: 0; }
+    .column.omega, .columns.omega               { margin-right: 0; }
+
+    /* Base Grid */
+    .container .one.column,
+    .container .one.columns                     { width: 40px;  }
+    .container .two.columns                     { width: 100px; }
+    .container .three.columns                   { width: 160px; }
+    .container .four.columns                    { width: 242px; margin-right: 0px;}
+	.container .four.columns.left               { width: 242px; margin-right: 20px;}
+    .container .five.columns                    { width: 286px; margin-right: 0px; margin-bottom:20px;}
+    .container .six.columns                     { width: 340px; }
+    .container .seven.columns                   { width: 400px; }
+    .container .eight.columns                   { width: 450px; margin: 0px;}
+    .container .nine.columns                    { width: 520px; }
+    .container .ten.columns                     { width: 580px; }
+    .container .eleven.columns                  { width: 682px; margin-right:31px;}
+    .container .twelve.columns                  { width: 823px; }
+    .container .thirteen.columns                { width: 744px; margin-right: 12px;}
+    .container .fourteen.columns                { width: 820px; }
+    .container .fifteen.columns                 { width: 880px; }
+    .container .sixteen.columns                 { width: 1100px; margin: 0;}
+	.container .sixteen.columns.left-twenty     {margin-left: 20px;}
+	.container .sixteen.columns.row-thirty      {margin-bottom: 30px;}
+	.container .sixteen.columns.row-fourty      {margin-bottom: 40px;}
+	.container .sixteen.columns.row-fifty      {margin-bottom: 50px;}
+
+    .container .one-third.column                { width: 300px; margin-right: 10px;}
+    .container .two-thirds.column               { width: 620px; }
+	.container .sixteen .post-wrapper .post-read .post-contents img { /* max-width:960px; */ width: 100%; }
+	.container .sixteen .post-wrapper .post-read .comment-wrap textarea {width:100%; box-sizing: border-box;}
+	.container .thirteen .post-wrapper .post-read .post-contents img { max-width:705px; }
+	.container .thirteen .post-wrapper .post-read .comment-wrap textarea {width:645px;}
+	.container .indexthird {
+	position:relative;
+	float:left;
+	width:333px;
+	height:295px;
+	margin:0;
+}
+	.container .onethird                        { position: relative; float: left; width: 300px; margin-right: 45px;}
+	.container .onefourth                       { position: relative; float: left; width: 225px; margin-right: 20px;}
+	.container .onefifth                        { position: relative; float: left; width: 176px; margin-right: 20px;}
+	.container .onesixth                        { position: relative; float: left; width: 145px; margin-right: 15px;}
+	.container .onehalf                         { position: relative; float: left; width: 540px; margin-right: 20px;}
+	.container .oneinhalf                       { float: left; width: 465px; margin-right: 25px;}
+	.container .twothirds,
+	.container .twothird                       { position: relative; float: left; width: 682px; margin-right: 20px;}
+	.container .threefourth                     { position: relative; float: left; width: 823px; margin-right: 21px;}
+
+	.container .twofifth                     { position: relative; float: left; width: 372px; margin-right: 20px;}
+	.container .threefifth                     { position: relative; float: left; width: 568px; margin-right: 20px;}
+	.container .fourfifth                     { position: relative; float: left; width: 744px; margin-right: 12px;}
+
+	.onethird.last, .onefourth.last, .onefifth.last, .onehalf.last, .oneinhalf.last, .twothirds.last, .twothird.last, .threefourth.last, .onesixth.last, .twofifth.last, .threefifth.last, .fourfifth.last { margin-right: 0px;}
+	.onethird img, .onefourth img, .onefifth img, .onehalf img, .twothirds img, .twothird img, .threefourth img{ max-width: 100%; height: auto;}
+
+
+    /* Offsets */
+    .container .offset-by-one                   { padding-left: 0;  }
+    .container .twelve.columns.offset-by-one    { padding-left: 0;  }
+    .container .offset-by-two                   { padding-left: 120px; }
+    .container .offset-by-three                 { padding-left: 180px; }
+    .container .offset-by-four                  { padding-left: 240px; }
+    .container .offset-by-five                  { padding-left: 300px; }
+    .container .offset-by-six                   { padding-left: 360px; }
+    .container .offset-by-seven                 { padding-left: 420px; }
+    .container .offset-by-eight                 { padding-left: 480px; }
+    .container .offset-by-nine                  { padding-left: 540px; }
+    .container .offset-by-ten                   { padding-left: 600px; }
+    .container .offset-by-eleven                { padding-left: 660px; }
+    .container .offset-by-twelve                { padding-left: 720px; }
+    .container .offset-by-thirteen              { padding-left: 780px; }
+    .container .offset-by-fourteen              { padding-left: 840px; }
+    .container .offset-by-fifteen               { padding-left: 900px; }
+
+	.container .bottomY-30               { margin-bottom: 30px; }
+	.container .bottomY-49               { margin-bottom: 49px; margin-top: 24px;}
+	.left-twenty{ margin-left: 20px;}
+
+	.container .sixteen.columns{
+	    margin-bottom: 40px;
+     }
+	.container .eleven.columns{
+	    margin-bottom: 20px;
+     }
+
+
+/* #side bar right side
+================================================== */
+.sidebar{
+	position: relative;
+}
+
+
+.sidebar .onefourth{
+	margin-bottom: 30px;
+}
+.sidebar .onefourth.row{
+	margin-bottom: 10px;
+}
+.sidebar .onefourth.ffTestimonial{
+  margin-bottom: 25px;
+}
+.sidebar .onefourth .acc{
+  margin-bottom: 0px;
+}
+
+.container .twelve.columns.left-sidebar   { float: right; }
+
+
+	 /* #Images
+================================================== */
+
+img.scale-with-grid {
+
+	max-width: 100%;
+	height: auto; }
+
+img.floatleft {
+	float: left;
+	display: inline;
+	margin-right: 10px;
+	position: relative;
+}
+
+
+
+/* #Misc
+================================================== */
+	.remove-bottom { margin-bottom: 0 !important; }
+	.half-bottom { margin-bottom: 10px !important; }
+	.add-bottom { margin-bottom: 20px !important; }
+
+   .remove-left { margin-left: 0 !important; }
+
+
+/* POPUP LAYOUT
+================================================== */
+.contentpop .popup.columns   { margin: 25px; text-align:left;}
+.contentpop .onehalf         { position: relative; float: left; width: 340px; margin-right: 20px; text-align:center;}
+.contentpop .onehalf.last    {margin-right:0;}
+
+

@@ -1,0 +1,1064 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="user">
+
+	<select id="userLogin" parameterType="Login" resultType="Login">
+		SELECT 
+			A.USER_ID USERID,
+			A.USER_NM USERNM,
+			IF(A.AUTHOR_ID = 5, A.PASSWORD, IF(B.INSTT_CD IS NULL || B.INSTT_CD = '', '', A.PASSWORD)) PASSWORD,
+			B.INSTT_CD INSTTCD,
+			B.INSTT_NM INSTTNM,
+			B.INSTT_CL_CD INSTTCLCD,
+			A.DEPT DEPT,
+			A.CLSF CLSF,
+			A.RSPOFC RSPOFC,
+			A.CHRG_DUTY_CD CHRGDUTYCD,
+			A.MOBLPHON_NO MOBLPHONNO,
+			A.TEL_NO TELNO,
+			A.LXTN_NO LXTNNO,
+			A.EMAIL EMAIL,
+			A.OGCR OGCR,
+			A.CONFM_YN CONFMYN,
+			A.STATUS_CD STATUSCD,
+			A.RETURN_RESN RETURNRESN, 
+			C.INSCTR_BGNDE INSCTRBGNDE,
+			C.INSCTR_ENDDE INSCTRENDDE,
+			IF(NOW() BETWEEN STR_TO_DATE(C.INSCTR_BGNDE, '%Y%m%d') AND STR_TO_DATE(C.INSCTR_ENDDE, '%Y%m%d') + INTERVAL 1 DAY, 'Y', 'N') INSCTRPDYN,
+			C.PERM_IP PERMIP,
+			B.PERM_IP INSTTPERMIP,
+			A.PASSWORD_CHANGE_DT PASSWORDCHANGEDT,
+			A.AUTHOR_ID AUTHORID,
+			A.STPLAT_AGRE_YN STPLATAGREYN,
+			DATE_FORMAT(A.LAST_LOGIN_DT, '%Y.%m.%d %h:%m:%i') LASTLOGINDT,
+			A.PASSWORD_ERR_CNT PASSWORDERRCNT,
+			IF(A.PASSWORD_ERR_DT IS NOT NULL, TIME_TO_SEC(TIMEDIFF(NOW(), A.PASSWORD_ERR_DT)), -1) PASSWORDERRTERM
+		FROM
+			USER_MASTR A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD AND B.DELETE_YN = 'N'
+			LEFT JOIN USER_INSCTR C ON C.USER_ID = A.USER_ID AND C.DELETE_YN = 'N'
+		WHERE
+			A.DELETE_YN = 'N'
+			AND A.USER_ID = #{userId}
+			<if test='password != null and password != ""'>
+			AND A.PASSWORD = #{password}
+			</if>
+	</select>
+	
+	<select id="certLogin" parameterType="zvl" resultType="Login">
+		SELECT 
+			A.USER_ID USERID,
+			A.USER_NM USERNM,
+			A.PASSWORD PASSWORD,
+			A.INSTT_CD INSTTCD,
+			B.INSTT_NM INSTTNM,
+			B.INSTT_CL_CD INSTTCLCD,
+			A.DEPT DEPT,
+			A.CLSF CLSF,
+			A.RSPOFC RSPOFC,
+			A.CHRG_DUTY_CD CHRGDUTYCD,
+			A.MOBLPHON_NO MOBLPHONNO,
+			A.TEL_NO TELNO,
+			A.LXTN_NO LXTNNO,
+			A.EMAIL EMAIL,
+			A.OGCR OGCR,
+			A.CONFM_YN CONFMYN,
+			A.PASSWORD_CHANGE_DT PASSWORDCHANGEDT,
+			A.AUTHOR_ID AUTHORID,
+			A.STPLAT_AGRE_YN STPLATAGREYN
+		FROM
+			USER_MASTR A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.DELETE_YN = 'N'
+			AND A.USER_ID = #{userId}
+			AND A.OGCR = #{ogcr}
+	</select>
+	
+	<select id="cntId" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(USER_ID)
+		FROM
+			USER_MASTR
+		WHERE
+			USER_ID = #{user_id}
+	</select>
+	
+	<select id="userInfo" parameterType="zvl" resultType="zvl">
+		SELECT
+			USER_ID, 
+			USER_NM, 
+			PASSWORD, 
+			INSTT_CD, 
+			(SELECT INSTT_NM FROM institution_mastr A WHERE A.INSTT_CD = B.INSTT_CD) AS INSTT_NM,
+			DEPT, 
+			CLSF, 
+			RSPOFC, 
+			STATUS_CD,
+			CHRG_DUTY_CD, 
+			MOBLPHON_NO, 
+			TEL_NO, 
+			LXTN_NO, 
+			EMAIL,
+			CONFM_YN,
+			RETURN_RESN,
+			AUTHOR_ID
+		FROM 
+			USER_MASTR B
+		WHERE 
+			DELETE_YN = 'N'
+			AND USER_ID = #{user_id}
+	</select>
+	
+	<insert id="userRegist" parameterType="zvl">
+		INSERT INTO USER_MASTR
+		(
+			USER_ID,
+			USER_NM,
+			PASSWORD,
+			INSTT_CD,
+			DEPT,
+			CLSF,
+			RSPOFC,
+			CHRG_DUTY_CD,
+			MOBLPHON_NO,
+			TEL_NO,
+			LXTN_NO,
+			EMAIL,
+			CONFM_YN,
+			STATUS_CD,
+			STPLAT_AGRE_YN,
+			USE_YN,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{user_id},
+			#{user_nm},
+			#{password},
+			#{instt_cd},
+			#{dept},
+			#{clsf},
+			#{rspofc},
+			#{chrg_duty_cd},
+			#{moblphon_no},
+			#{tel_no},
+			#{lxtn_no},
+			#{email},
+			'N',
+			'SS02',
+			'Y',
+			'Y',
+			now(),
+			#{user_id}
+		)
+	</insert>
+
+	<update id="certRegist" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			OGCR = #{ogcr},
+			UPDT_DT = now(),
+			UPDT_ID = #{userId}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+
+	<update id="updateUser" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			DEPT    = #{dept},
+			CLSF    = #{clsf},
+			RSPOFC  = #{rspofc},
+			CHRG_DUTY_CD = #{chrg_duty_cd},
+			MOBLPHON_NO  = #{moblphon_no},
+			TEL_NO  = #{tel_no},
+			LXTN_NO = #{lxtn_no},
+			EMAIL   = #{email},
+			UPDT_DT = now(),
+			UPDT_ID = #{userId}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+
+	<update id="updatePass" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			PASSWORD    = #{password},
+			UPDT_DT = now(),
+			UPDT_ID = #{userId}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+	
+	<insert id="connectHistoryInsert" parameterType="zvl">
+		INSERT INTO CONECT_HIST
+		(
+			USER_ID, 
+			IP, 
+			<if test='parameter != null and parameter != ""'>
+			PARAMETER,
+			</if>
+			CONECT_DT, 
+			CONECT_CD, 
+			CRUD,
+			REGIST_DT, 
+			REGIST_ID,
+			MENU_ID,
+			VIEW_SEQ,
+			BBS_CD,
+			SESSION_ID
+		)
+		VALUES
+		(
+			#{user_id},
+			#{ip}, 
+			<if test='parameter != null and parameter != ""'>
+			#{parameter}, 
+			</if>
+			NOW(),
+			#{conect_cd}, 
+			#{crud}, 
+			NOW(), 
+			#{user_id},
+			#{menu_id},
+			#{view_seq},
+			#{bbs_cd},
+			#{session_id}
+		)
+	</insert>
+	
+	<update id="lastConnectDtUpdate" parameterType="zvl">
+		UPDATE USER_MASTR SET
+			LAST_LOGIN_DT = 
+			(
+				SELECT
+					MAX(CONECT_DT)
+				FROM
+					CONECT_HIST
+				WHERE
+					CONECT_CD = 'HC02'
+					AND USER_ID = #{user_id}
+			)
+		WHERE
+			USER_ID = #{user_id}
+	</update>
+	
+	<update id="passwordErrorCntDtUpdate" parameterType="Login">
+		UPDATE USER_MASTR SET
+			PASSWORD_ERR_CNT = PASSWORD_ERR_CNT + 1,
+			PASSWORD_ERR_DT = NOW()
+		WHERE
+			USER_ID = #{userId}
+		;
+		
+		<selectKey keyProperty="passwordErrCnt" resultType="int" order="AFTER">
+			SELECT 
+				PASSWORD_ERR_CNT passwordErrCnt
+			FROM
+				USER_MASTR
+			WHERE
+				USER_ID = #{userId}	 
+		</selectKey>
+	</update>
+	
+	<update id="passwordErrorCntDtReset" parameterType="Login">
+		UPDATE USER_MASTR SET
+			PASSWORD_ERR_CNT = 0,
+			PASSWORD_ERR_DT = NULL
+		WHERE
+			USER_ID = #{userId}
+	</update>
+	
+	<select id="userList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+			@ROWNUM:=@ROWNUM+1 ROWNUM,
+			A.*
+		FROM
+		(
+			SELECT
+				A.USER_ID, 
+				A.USER_NM, 
+				A.INSTT_CD, 
+				B.INSTT_NM, 
+				A.CHRG_DUTY_CD,
+				A.DEPT,
+				A.CLSF,
+				A.RSPOFC,
+				A.MOBLPHON_NO, 
+				A.TEL_NO, 
+				A.LXTN_NO, 
+				A.EMAIL,
+				A.CONFM_YN,
+				A.STATUS_CD,
+				A.AUTHOR_ID,
+				C.CODE_NM STATUS_NM,
+				DATE_FORMAT(MAX(D.CONECT_DT), '%Y-%m-%d %H:%i:%s') LAST_CONNECT_DT,
+				DATE_FORMAT(MAX(A.LAST_LOGIN_DT), '%Y-%m-%d %H:%i:%s') LAST_LOGIN_DT,
+				A.REGIST_DT
+			FROM 
+				USER_MASTR A
+				LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD AND B.DELETE_YN = 'N'
+				LEFT JOIN CMMN_CD_MASTR C ON A.STATUS_CD = C.CODE AND C.DELETE_YN = 'N' AND C.UPPER_CD = 'SS00'
+				LEFT JOIN CONECT_HIST D ON A.USER_ID = D.USER_ID AND D.CONECT_CD = 'HC02'
+				LEFT JOIN AUTHORITY_MASTR E ON A.AUTHOR_ID = E.AUTHOR_ID AND E.DELETE_YN = 'N'
+			WHERE 1=1
+				AND A.DELETE_YN = 'N'
+				AND (A.AUTHOR_ID != '5' OR A.AUTHOR_ID IS NULL)
+				<if test='userNm != null and userNm != ""'>
+					AND A.USER_NM LIKE CONCAT('%', #{userNm}, '%')
+				</if>
+				<if test='authorId != null and authorId != ""'>
+					AND E.AUTHOR_ID = #{authorId}
+				</if>
+				<if test='insttClCd != null and insttClCd != ""'>
+					AND B.INSTT_CL_CD = #{insttClCd}
+				</if>
+				<if test='insttSecList != null and insttSecList != ""'>
+					AND B.INSTT_CD = #{insttSecList}
+				</if>
+				<if test='userId != null and userId != ""'>
+					AND A.USER_ID LIKE CONCAT('%', #{userId}, '%')
+				</if>
+				<if test='stateFilter != null and stateFilter != "" '>
+					<if test='stateFilter == "stateFilter1"'>
+						AND A.STATUS_CD = 'SS02'
+					</if>
+					<if test='stateFilter == "stateFilter2"'>
+						AND A.STATUS_CD = 'SS01'
+					</if>
+					<if test='stateFilter == "stateFilter3"'>
+						AND A.STATUS_CD = 'SS03'
+					</if>
+				</if>
+				<if test='search != null and search != ""'>
+				AND CONCAT(A.USER_NM,A.USER_ID,B.INSTT_NM,A.MOBLPHON_NO,A.TEL_NO) REGEXP #{search} 
+				</if>
+			GROUP BY
+				A.USER_ID, 
+				A.USER_NM, 
+				A.INSTT_CD, 
+				B.INSTT_NM, 
+				A.CHRG_DUTY_CD,
+				A.DEPT,
+				A.CLSF,
+				A.RSPOFC,
+				A.MOBLPHON_NO, 
+				A.TEL_NO, 
+				A.LXTN_NO, 
+				A.EMAIL,
+				A.CONFM_YN,
+				A.STATUS_CD,
+				C.CODE_NM,
+				A.REGIST_DT
+			ORDER BY A.REGIST_DT
+		)A
+		ORDER BY ROWNUM DESC
+		<if test='excelFlag == null or excelFlag == ""'>
+			<if test="recordCountPerPage != null and firstIndex != null">
+			LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+			</if>
+		</if>
+	</select>
+	
+	<select id="userListCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*) userCnt
+		FROM
+		(
+			SELECT
+				A.USER_ID
+			FROM 
+				USER_MASTR A
+				LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD AND B.DELETE_YN = 'N'
+				LEFT JOIN CMMN_CD_MASTR C ON A.STATUS_CD = C.CODE AND C.DELETE_YN = 'N' AND C.UPPER_CD = 'SS00'
+				LEFT JOIN CONECT_HIST D ON A.USER_ID = D.USER_ID
+				LEFT JOIN AUTHORITY_MASTR E ON A.AUTHOR_ID = E.AUTHOR_ID AND E.DELETE_YN = 'N'
+			WHERE
+				A.DELETE_YN = 'N' 
+				AND (A.AUTHOR_ID != '5' OR A.AUTHOR_ID IS NULL)
+				<if test='userNm != null and userNm != ""'>
+					AND A.USER_NM LIKE CONCAT('%', #{userNm}, '%')
+				</if>
+				<if test='authorId != null and authorId != ""'>
+					AND E.AUTHOR_ID = #{authorId}
+				</if>
+				<if test='insttClCd != null and insttClCd != ""'>
+					AND B.INSTT_CL_CD = #{insttClCd}
+				</if>
+				<if test='insttSecList != null and insttSecList != ""'>
+					AND B.INSTT_CD = #{insttSecList}
+				</if>
+				<if test='userId != null and userId != ""'>
+					AND A.USER_ID LIKE CONCAT('%', #{userId}, '%')
+				</if>
+				<if test='stateFilter != null and stateFilter != "" '>
+					<if test='stateFilter == "stateFilter1"'>
+						AND A.STATUS_CD = 'SS02'
+					</if>
+					<if test='stateFilter == "stateFilter2"'>
+						AND A.STATUS_CD = 'SS01'
+					</if>
+					<if test='stateFilter == "stateFilter3"'>
+						AND A.STATUS_CD = 'SS03'
+					</if>
+				</if>
+				<if test='search != null and search != ""'>
+				AND CONCAT(A.USER_NM,A.USER_ID,B.INSTT_NM,A.MOBLPHON_NO,A.TEL_NO) REGEXP #{search} 
+				</if>
+			GROUP BY
+				A.USER_ID
+		)A
+	</select>
+	
+	<select id="insctrInsttList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			A.INSTT_CD,
+			A.INSTT_NM,
+			IF(A.INSTT_CD = B.INSTT_CD , 'Y', 'N') ASIGN 
+		FROM 
+			INSTITUTION_MASTR A
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD AND B.USER_ID = #{user_id}
+		WHERE
+			A.DELETE_YN = 'N'
+	</select>
+	
+	<insert id="setInsctrInstt" parameterType="zvl">
+		DELETE FROM INSTT_INSCTR_MAP
+		WHERE USER_ID = #{user_id}
+		;
+		
+		INSERT INTO INSTT_INSCTR_MAP
+		(
+			USER_ID,
+			INSTT_CD,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		<foreach collection="instt_cds" item="item" separator = "," >
+		(
+ 			#{user_id},
+			#{item},
+			NOW(),
+			#{adminId}
+		)
+		</foreach>
+	</insert>
+	
+	<select id="selectNextInsctrNo" parameterType="zvl" resultType="string">
+		SELECT
+			MAX(A.userId) userId
+		FROM
+			(
+     		SELECT 
+				CONCAT(#{mngLevelType}, DATE_FORMAT(NOW(), '%Y'), LPAD(SUBSTR(USER_ID, 7, 3) + 1, 3, '0')) AS userId
+			FROM
+				USER_INSCTR 
+       		WHERE
+       			SUBSTR(USER_ID, 3, 4) = DATE_FORMAT(NOW(), '%Y')
+       		AND
+       			SUBSTR(USER_ID, 1, 2) = #{mngLevelType}
+      		UNION ALL
+      			SELECT
+       				CONCAT(#{mngLevelType}, DATE_FORMAT(NOW(), '%Y'), '001') AS userId
+      			FROM
+       				DUAL
+       		) A
+	</select>
+
+	<update id="resetPassword" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			PASSWORD = #{password},
+			PASSWORD_CHANGE_DT = NOW(),
+			UPDT_DT = NOW(),
+			UPDT_ID = #{adminId}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+	
+	<update id="firstLoginChangePassword" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			PASSWORD = #{password},
+			PASSWORD_CHANGE_DT = NOW(),
+			UPDT_DT = NOW(),
+			UPDT_ID = #{userId}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+	
+	<update id="modifyUser" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			<if test='instt_cd != null and instt_cd != ""'>
+			INSTT_CD = ${instt_cd},
+			</if>
+			DEPT    = #{dept},
+			CLSF    = #{clsf},
+			RSPOFC  = #{rspofc},
+			<if test='chrg_duty_cd != null and chrg_duty_cd != ""'>
+			CHRG_DUTY_CD = #{chrg_duty_cd},
+			</if>
+			MOBLPHON_NO  = #{moblphon_no},
+			TEL_NO  = #{tel_no},
+			LXTN_NO = #{lxtn_no},
+			EMAIL   = #{email},
+			<if test='confm_yn != null and confm_yn != ""'>
+			CONFM_YN = #{confm_yn},
+			</if>
+			<if test='status_cd != null and status_cd != ""'>
+			STATUS_CD = #{status_cd},
+			</if>
+			<if test='return_resn != null and return_resn != ""'>
+			RETURN_RESN = #{return_resn},
+			</if>
+			<if test='author_id != null and author_id != ""'>
+			AUTHOR_ID = #{author_id},
+			</if>
+			UPDT_DT = now(),
+			UPDT_ID = #{adminId}
+		WHERE 
+			USER_ID = #{user_id}
+	</update>
+	
+	<insert id="createUser" parameterType="zvl">
+		INSERT INTO USER_MASTR
+		(
+			USER_ID,
+			USER_NM,
+			PASSWORD,
+			INSTT_CD,
+			DEPT,
+			CLSF,
+			RSPOFC,
+			CHRG_DUTY_CD,
+			MOBLPHON_NO,
+			TEL_NO,
+			LXTN_NO,
+			EMAIL,
+			CONFM_YN,
+			STATUS_CD,
+			RETURN_RESN,
+			AUTHOR_ID,
+			STPLAT_AGRE_YN,
+			USE_YN,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{user_id},
+			#{user_nm},
+			#{password},
+			#{instt_cd},
+			#{dept},
+			#{clsf},
+			#{rspofc},
+			#{chrg_duty_cd},
+			#{moblphon_no},
+			#{tel_no},
+			#{lxtn_no},
+			#{email},
+			#{confm_yn},
+			#{status_cd},
+			#{return_resn},
+			#{author_id},
+			'Y',
+			'Y',
+			now(),
+			#{adminId}
+		)
+	</insert>
+	
+	<update id="userDelete" parameterType="zvl">
+		UPDATE USER_MASTR SET
+			DELETE_YN = 'Y',
+			DELETE_DT = NOW(),
+			DELETE_ID = #{user_id}
+		WHERE 
+			USER_ID IN 
+		<foreach collection="user_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+		</foreach>
+	</update>
+
+	<select id="findID" parameterType="zvl" resultType="zvl">
+		SELECT
+			USER_ID
+		FROM 
+			USER_MASTR
+		WHERE 
+			USER_NM = #{userNm}
+		AND EMAIL   = #{email}
+		AND DELETE_YN = 'N'
+	</select>
+	
+	<select id="selectUserCertificationList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+			@ROWNUM:=@ROWNUM+1 rowNum,
+			A.*
+		FROM
+		(
+			SELECT
+				  A.SEQ seq
+				, A.USER_NM userNm 
+				, A.EMAIL email
+				, A.STATUS  status
+				, DATE_FORMAT(A.STATUS_DT, '%Y.%m.%d') statusDt
+				, DATE_FORMAT(A.REGIST_DT, '%Y.%m.%d') registDt
+				, A.REGIST_ID registId
+				, A.UPDT_DT updtDt
+				, A.UPDT_ID updtId
+				, A.DELETE_DT deleteDt
+				, A.DELETE_ID deleteId
+				, A.DELETE_YN deleteYn
+				, B.USER_NM registNm
+			FROM 
+				USER_CERTIFICATION A
+				LEFT OUTER JOIN USER_MASTR B
+				ON A.REGIST_ID = B.USER_ID
+			WHERE
+				A.DELETE_YN = 'N'
+				<if test='searchUserNm != null and searchUserNm != ""'>
+					AND A.USER_NM LIKE CONCAT('%', #{searchUserNm}, '%')
+				</if>
+				<if test='stateFilter != null and stateFilter != "" '>
+					<if test='stateFilter == "stateFilter1"'>
+						AND A.STATUS = 'RS03'
+					</if>
+					<if test='stateFilter == "stateFilter2"'>
+						AND A.STATUS IS NULL
+					</if>
+				</if>
+				<if test='search != null and search != ""'>
+					AND A.USER_NM LIKE CONCAT('%', #{search}, '%')
+					OR A.USER_ID LIKE CONCAT('%', #{search}, '%')
+				</if>
+			ORDER BY A.REGIST_DT
+		)A
+		ORDER BY ROWNUM DESC
+		<if test="recordCountPerPage != null and firstIndex != null">
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select>
+	
+	<select id="selectUserCertificationCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			USER_CERTIFICATION A
+			LEFT OUTER JOIN USER_MASTR B
+			ON A.REGIST_ID = B.USER_ID
+		WHERE
+			A.DELETE_YN = 'N'
+			<if test='searchUserNm != null and searchUserNm != ""'>
+				AND CONCAT(A.USER_NM,A.EMAIL) REGEXP #{searchUserNm} 
+			</if>
+			<if test='stateFilter != null and stateFilter != "" '>
+				<if test='stateFilter == "stateFilter1"'>
+					AND A.STATUS = 'RS03'
+				</if>
+				<if test='stateFilter == "stateFilter2"'>
+					AND A.STATUS IS NULL
+				</if>
+			</if>
+	</select>
+	
+	<select id="selectUserCertification" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			USER_CERTIFICATION A
+			LEFT OUTER JOIN USER_MASTR B
+			ON A.REGIST_ID = B.USER_ID
+		WHERE
+			A.DELETE_YN = 'N'
+			<if test='searchUserNm != null and searchUserNm != ""'>
+				AND CONCAT(A.USER_NM,A.EMAIL) REGEXP #{searchUserNm} 
+			</if>
+			<if test='stateFilter != null and stateFilter != "" '>
+				<if test='stateFilter == "stateFilter1"'>
+					AND A.STATUS = 'RS03'
+				</if>
+				<if test='stateFilter == "stateFilter2"'>
+					AND A.STATUS IS NULL
+				</if>
+			</if>
+	</select>
+	
+	<select id="selectUserCertificationCheck" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			USER_MASTR
+		WHERE 
+			DELETE_YN = 'N'
+		AND
+			USER_NM = #{userNm}
+		AND
+			EMAIL = #{email}
+	</select>
+	
+	<insert id="insertUserCertification" parameterType="zvl">
+		INSERT INTO USER_CERTIFICATION
+		(
+			  USER_NM
+			, EMAIL
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+			  #{userNm}
+			, #{email}
+			, now()
+			, #{userId}
+		)
+	</insert>
+	
+	<update id="updateUserCertification" parameterType="zvl">
+		UPDATE USER_CERTIFICATION	SET
+			  USER_NM = #{userNm}
+			, EMAIL = #{email}
+			, UPDT_DT = now()
+			, UPDT_ID = #{userId}
+		WHERE 
+			SEQ = #{seq}
+	</update>
+	
+	<update id="updateInsctrPasswd" parameterType="zvl">
+		UPDATE USER_MASTR	SET
+			  PASSWORD = #{password}
+			, PASSWORD_CHANGE_DT = null
+			, UPDT_DT = now()
+			, UPDT_ID = #{adminId}
+		WHERE 
+			USER_ID = #{userId}
+	</update>
+	
+	<delete id="deleteUserCertification" parameterType="zvl">
+		DELETE
+		FROM
+			${del_user_tbl}
+		WHERE 
+			USER_ID = #{user_id}
+	</delete>
+	
+	<select id="selectUserLogList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+			@ROWNUM:=@ROWNUM+1 rowNum,
+			A.*
+		FROM
+		(
+			SELECT
+				  A.SEQ seq
+				, A.USER_ID userId 
+				, A.IP ip
+				, A.CONECT_CD conectCd
+				, A.PARAMETER parameter
+				, DATE_FORMAT(A.CONECT_DT, '%Y.%m.%d %H:%i:%s') conectDt
+				, A.REGIST_ID registId
+				, A.CRUD crud
+				, B.USER_NM userNm
+				, C.CODE_NM codeNm
+			FROM 
+				CONECT_HIST A
+				LEFT OUTER JOIN USER_MASTR B
+				ON A.USER_ID = B.USER_ID
+				LEFT OUTER JOIN CMMN_CD_MASTR C
+				ON C.UPPER_CD = 'HC00'
+				AND C.CODE = A.CONECT_CD
+			WHERE
+				1 = 1
+				<if test='searchConectCd != null and searchConectCd != ""'>
+				AND A.CONECT_CD = #{searchConectCd}
+				</if>
+				<if test='searchBgnde != null and searchBgnde != ""'>
+				AND DATE_FORMAT(A.CONECT_DT, '%Y%m%d') >= DATE_FORMAT(#{searchBgnde}, '%Y%m%d')
+				</if>
+				<if test='searchEndde != null and searchEndde != ""'>
+				AND DATE_FORMAT(#{searchEndde}, '%Y%m%d') >= DATE_FORMAT(A.CONECT_DT, '%Y%m%d') 
+				</if>
+			ORDER BY A.REGIST_DT
+		)A
+		ORDER BY ROWNUM DESC
+		<if test="recordCountPerPage != null and firstIndex != null">
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select>
+	
+	<select id="selectUserLogCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			CONECT_HIST A
+			LEFT OUTER JOIN USER_MASTR B
+			ON A.USER_ID = B.USER_ID
+			LEFT OUTER JOIN CMMN_CD_MASTR C
+			ON C.UPPER_CD = 'HC00'
+			AND C.CODE = A.CONECT_CD
+		WHERE
+			1 = 1
+			<if test='searchConectCd != null and searchConectCd != ""'>
+			AND A.CONECT_CD = #{searchConectCd}
+			</if>
+			<if test='searchBgnde != null and searchBgnde != ""'>
+			AND DATE_FORMAT(A.CONECT_DT, '%Y%m%d') >= DATE_FORMAT(#{searchBgnde}, '%Y%m%d')
+			</if>
+			<if test='searchEndde != null and searchEndde != ""'>
+			AND DATE_FORMAT(#{searchEndde}, '%Y%m%d') >= DATE_FORMAT(A.CONECT_DT, '%Y%m%d') 
+			</if>
+	</select>
+	
+	<select id="selectUserInsctrList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+			@ROWNUM:=@ROWNUM+1 rowNum,
+			A.*
+		FROM
+		(
+			SELECT
+				A.USER_ID userId, 
+				A.USER_NM userNm, 
+				DATE_FORMAT(A.INSCTR_BGNDE, '%Y.%m.%d') AS insctrBgnde,
+				DATE_FORMAT(A.INSCTR_ENDDE, '%Y.%m.%d') AS insctrEndde, 
+				A.MNG_LEVEL_CD mngLevelCd,
+				B.CODE_NM mngLevelNm,
+				A.PERM_IP permIp,
+				A.REGIST_DT registDt,
+				A.REGIST_ID registId,
+				A.UPDT_DT updtDt,
+				A.UPDT_ID updtId,
+				A.DELETE_DT deleteDt,
+				A.DELETE_ID deleteId,
+				A.DELETE_YN deleteYn,
+				IF((SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) = 0, 'N', 'Y') insttMapYn
+			FROM 
+				USER_INSCTR A
+				LEFT OUTER JOIN CMMN_CD_MASTR B
+				ON B.UPPER_CD = 'ML00'
+				AND B.CODE = A.MNG_LEVEL_CD
+			WHERE
+				A.DELETE_YN = 'N'
+				<if test='searchUserNm != null and searchUserNm != ""'>
+					AND CONCAT(A.USER_NM,A.USER_ID) REGEXP #{searchUserNm} 
+				</if>
+				<if test='searchMngLevelCd != null and searchMngLevelCd != ""'>
+					AND A.MNG_LEVEL_CD = #{searchMngLevelCd}
+				</if>
+				<if test='searchBgnde != null and searchBgnde != ""'>
+					AND DATE_FORMAT(A.INSCTR_BGNDE, '%Y%m%d') >= DATE_FORMAT(#{searchBgnde}, '%Y%m%d')
+				</if>
+				<if test='searchEndde != null and searchEndde != ""'>
+					AND DATE_FORMAT(#{searchEndde}, '%Y%m%d') >= DATE_FORMAT(A.INSCTR_ENDDE, '%Y%m%d') 
+				</if>
+				<if test='searchInstt != null and searchInstt != ""'>
+					<if test='"Y" == searchInstt'>
+						AND (SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) > 0
+					</if>
+					<if test='"N" == searchInstt'>
+						AND (SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) = 0
+					</if>
+				</if>
+			ORDER BY A.REGIST_DT
+		)A
+		ORDER BY ROWNUM DESC
+		<if test="recordCountPerPage != null and firstIndex != null">
+		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}			
+		</if>
+	</select> 
+	
+	<select id="selectUserInsctrExcelList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.USER_ID userId, 
+			A.USER_NM userNm, 
+			DATE_FORMAT(A.INSCTR_BGNDE, '%Y.%m.%d') AS insctrBgnde,
+			DATE_FORMAT(A.INSCTR_ENDDE, '%Y.%m.%d') AS insctrEndde, 
+			A.MNG_LEVEL_CD mngLevelCd,
+			B.CODE_NM mngLevelNm,
+			A.PERM_IP permIp,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn,
+			D.INSTT_NM insttNm
+		FROM 
+			USER_INSCTR A
+			LEFT OUTER JOIN CMMN_CD_MASTR B
+			ON B.UPPER_CD = 'ML00' AND B.CODE = A.MNG_LEVEL_CD
+			LEFT OUTER JOIN INSTT_INSCTR_MAP C ON A.USER_ID = C.USER_ID
+			LEFT OUTER JOIN INSTITUTION_MASTR D ON C.INSTT_CD = D.INSTT_CD 
+		WHERE
+			A.DELETE_YN = 'N'
+			<if test='searchUserNm != null and searchUserNm != ""'>
+				AND A.USER_NM LIKE CONCAT('%', #{searchUserNm}, '%')
+			</if>
+			<if test='searchMngLevelCd != null and searchMngLevelCd != ""'>
+				AND A.MNG_LEVEL_CD = #{searchMngLevelCd}
+			</if>
+			<if test='searchBgnde != null and searchBgnde != ""'>
+				AND DATE_FORMAT(A.INSCTR_BGNDE, '%Y%m%d') >= DATE_FORMAT(#{searchBgnde}, '%Y%m%d')
+			</if>
+			<if test='searchEndde != null and searchEndde != ""'>
+				AND DATE_FORMAT(#{searchEndde}, '%Y%m%d') >= DATE_FORMAT(A.INSCTR_ENDDE, '%Y%m%d') 
+			</if>
+			<if test='searchInstt != null and searchInstt != ""'>
+				<if test='"Y" == searchInstt'>
+					AND (SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) > 0
+				</if>
+				<if test='"N" == searchInstt'>
+					AND (SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) = 0
+				</if>
+			</if>
+		ORDER BY A.REGIST_DT
+	</select>
+	
+	<select id="selectUserInsctrCnt" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			USER_INSCTR A
+		WHERE
+			A.DELETE_YN = 'N'
+			<if test='searchUserNm != null and searchUserNm != ""'>
+			AND CONCAT(A.USER_NM,A.USER_ID) REGEXP #{searchUserNm} 			
+			</if>
+			<if test='searchMngLevelCd != null and searchMngLevelCd != ""'>
+			AND A.MNG_LEVEL_CD = #{searchMngLevelCd}
+			</if>
+			<if test='searchBgnde != null and searchBgnde != ""'>
+				AND DATE_FORMAT(A.INSCTR_BGNDE, '%Y%m%d') >= DATE_FORMAT(#{searchBgnde}, '%Y%m%d')
+			</if>
+			<if test='searchEndde != null and searchEndde != ""'>
+				AND DATE_FORMAT(#{searchEndde}, '%Y%m%d') >= DATE_FORMAT(A.INSCTR_ENDDE, '%Y%m%d') 
+			</if>
+			<if test='searchInstt != null and searchInstt != ""'>
+				<if test='"Y" == searchInstt'>
+					AND (SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) > 0
+				</if>
+				<if test='"N" == searchInstt'>
+					AND (SELECT COUNT(*) FROM INSTT_INSCTR_MAP WHERE A.USER_ID = USER_ID) = 0
+				</if>
+			</if>
+	</select>
+	
+	<insert id="insertUserInsctr" parameterType="zvl">
+		INSERT INTO USER_INSCTR
+		(
+			  USER_ID
+			, USER_NM
+			, INSCTR_BGNDE
+			, INSCTR_ENDDE
+			, MNG_LEVEL_CD
+			, PERM_IP
+			, REGIST_DT
+			, REGIST_ID
+		)
+		VALUES
+		(
+			  #{user_id}
+			, #{user_nm}
+			, #{fromDate}
+			, #{toDate}
+			, #{mngLevelCd}
+			, #{permIp}
+			, now()
+			, #{adminId}
+		);
+		
+		INSERT INTO USER_MASTR
+		(
+			USER_ID,
+			USER_NM,
+			PASSWORD,
+			CONFM_YN,
+			STATUS_CD,
+			AUTHOR_ID,
+			STPLAT_AGRE_YN,
+			USE_YN,
+			REGIST_DT,
+			REGIST_ID
+		)
+		VALUES
+		(
+			#{user_id},
+			#{user_nm},
+			#{password},
+			'Y',
+			'SS02',
+			5,
+			'Y',
+			'Y',
+			now(),
+			#{adminId}
+		)
+	</insert>
+	
+	<update id="updateUserInsctr" parameterType="zvl">
+		UPDATE USER_INSCTR	SET
+			  INSCTR_BGNDE = #{fromDate}
+			, INSCTR_ENDDE = #{toDate}
+			, USER_NM = #{user_nm}
+			, MNG_LEVEL_CD = #{mngLevelCd}
+			, PERM_IP = #{permIp}
+			, UPDT_DT = now()
+			, UPDT_ID = #{adminId}
+		WHERE 
+			USER_ID = #{user_id}
+	</update>
+	
+	<update id="deleteUserInsctr" parameterType="zvl">
+		UPDATE USER_INSCTR	SET
+			  DELETE_YN = 'Y'
+			, DELETE_DT = now()
+			, DELETE_ID = #{adminId}
+		WHERE 
+			USER_ID = #{user_id};
+			
+		UPDATE USER_MASTR	SET
+			  DELETE_YN = 'Y'
+			, DELETE_DT = now()
+			, DELETE_ID = #{adminId}
+		WHERE 
+			USER_ID = #{user_id};
+			
+		DELETE
+		FROM
+			INSTT_INSCTR_MAP
+		WHERE 
+			USER_ID = #{user_id};
+	</update>
+	
+		
+	<select id="passwordChangeDtYN" parameterType="Login" resultType="string">
+		SELECT 
+			CASE 
+			<![CDATA[
+				WHEN X.PCD_NEEDDATE < X.TODAY THEN 'Y' 
+			]]>
+				ELSE 'N' 
+			END AS RESULT
+		FROM
+			(	SELECT 
+					DATE_FORMAT(NOW(),'%y%m%d') AS TODAY,
+					DATE_FORMAT(ADDDATE(PASSWORD_CHANGE_DT, INTERVAL 3 MONTH),'%y%m%d') AS PCD_NEEDDATE
+				FROM USER_MASTR
+				WHERE 1=1 
+				AND USER_ID = #{userId}
+			) X
+	</select>
+	
+	<update id="updateLastLoginDt" parameterType="Login">
+		UPDATE USER_MASTR 
+		SET LAST_LOGIN_DT = NOW()
+		WHERE USER_ID = #{userId}
+	</update>
+</mapper>

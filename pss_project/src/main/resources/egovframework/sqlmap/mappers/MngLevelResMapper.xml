@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mngLevelRes">
+
+	<select id="mngLevelInsttList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			INSTITUTION_MASTR A
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+		</if>
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			AND B.DELETE_YN ='N'
+			AND B.USER_ID = #{user_id}
+		</if>
+		<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{instt_cl_cd}
+		</if>
+		<if test='instt_nm != null and instt_nm != ""'>
+			AND A.INSTT_CD = #{instt_nm}
+		</if>		
+		ORDER BY A.OUTPUT_ORDR	
+	</select>
+
+	<select id="mngLevelInsttSelectList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD, 
+			A.INSTT_NM, 
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM,
+			A.UPPER_INSTT_CD,
+			D.DCNT
+		FROM 
+			INSTITUTION_MASTR A
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+		</if>
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+			JOIN
+			(
+				SELECT
+					A.INSTT_CL_CD,
+				   COUNT(C.CODE_NM) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					INSTT_CL_CD
+			) D ON A.INSTT_CL_CD = D.INSTT_CL_CD
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			AND B.DELETE_YN ='N'
+			AND B.USER_ID = #{user_id}
+		</if>
+		<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+			AND A.INSTT_CL_CD = #{instt_cl_cd}
+		</if>	
+		ORDER BY A.OUTPUT_ORDR	
+	</select>
+	
+	<select id="mngLevelInsttTableList" parameterType="zvl" resultType="zvl">
+		SELECT
+			LV,
+			INSTT_CD,
+			INSTT_NM,
+			DCNT
+		FROM
+		(
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'1' LV,
+					A.INSTT_CL_CD INSTT_CD,
+					C.CODE_NM INSTT_NM,
+					COUNT(A.INSTT_CD) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					A.INSTT_CL_CD,
+					C.CODE_NM
+			) A
+			UNION ALL
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'2' LV,
+					A.INSTT_CD,
+					A.INSTT_NM,
+					COUNT(A.INSTT_CD) DCNT
+				FROM 
+					INSTITUTION_MASTR A
+				<if test='user_id != null and user_id != ""'>
+					LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+				</if>
+					LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+				WHERE
+					A.DELETE_YN = 'N'
+				<if test='user_id != null and user_id != ""'>
+					AND B.DELETE_YN ='N'
+					AND B.USER_ID = #{user_id}
+				</if>
+				<if test='instt_cl_cd != null and instt_cl_cd != ""'>
+					AND A.INSTT_CL_CD = #{instt_cl_cd}
+				</if>
+				GROUP BY 
+					A.INSTT_CD,
+					A.INSTT_NM
+			) B
+		)A
+	</select>
+	
+	
+	<select id="mngLevelInsttEvlOrderList" parameterType="zvl" resultType="zvl">
+		SELECT DISTINCT
+			ORDER_NO
+		FROM
+			MNG_LEVEL_IDX_MASTR
+	</select>
+	
+	<select id="mngLevelInsttClCdList" parameterType="zvl" resultType="zvl">
+		SELECT DISTINCT
+			A.INSTT_CL_CD,
+			C.CODE_NM INSTT_CL_NM
+		FROM 
+			INSTITUTION_MASTR A
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP B ON A.INSTT_CD = B.INSTT_CD
+		</if>
+			LEFT JOIN CMMN_CD_MASTR C ON A.INSTT_CL_CD = C.CODE
+		WHERE
+			A.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			AND B.DELETE_YN ='N'
+			AND B.USER_ID = #{user_id}
+		</if>
+	</select>
+	
+	<select id="mngLevelIdxList" parameterType="zvl" resultType="zvl">
+		SELECT
+			LV,
+			ORDER_NO,
+			IDX,
+			CONTENTS,
+			DCNT
+		FROM
+		(
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'1' LV,
+					ORDER_NO,
+					LCLAS_ORDER IDX,
+					LCLAS CONTENTS,
+					COUNT(*) DCNT
+				FROM 
+					MNG_LEVEL_IDX_MASTR
+				WHERE
+					1=1
+				<if test='order_no != null and order_no != ""'>
+					AND ORDER_NO = #{order_no}
+				</if>
+				GROUP BY
+					ORDER_NO, 
+					LCLAS
+				ORDER BY 
+					LCLAS_ORDER ASC
+			) A
+			UNION ALL
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'2' LV,
+					ORDER_NO,
+					/* MLSFC_ORDER IDX, */
+					CONCAT(LCLAS_ORDER, '.', MLSFC_ORDER) IDX,
+					MLSFC CONTENTS,
+					COUNT(*) DCNT
+				FROM 
+					MNG_LEVEL_IDX_MASTR
+				WHERE
+					1=1
+				<if test='order_no != null and order_no != ""'>
+					AND ORDER_NO = #{order_no}
+				</if>
+				GROUP BY
+					ORDER_NO, 
+					MLSFC
+				ORDER BY 
+					LCLAS_ORDER ASC, MLSFC_ORDER ASC
+			) B 
+			UNION ALL
+			SELECT
+				*
+			FROM
+			(
+				SELECT
+					'3' LV,
+					ORDER_NO,
+					/* CONCAT(MLSFC_ORDER, '-', CHECK_ITEM_ORDER) IDX, */
+					CONCAT(LCLAS_ORDER, '.', MLSFC_ORDER, '.', CHECK_ITEM_ORDER) IDX,
+					CHECK_ITEM CONTENTS,
+					COUNT(*) DCNT
+				FROM 
+					MNG_LEVEL_IDX_MASTR
+				WHERE
+					1=1
+				<if test='order_no != null and order_no != ""'>
+					AND ORDER_NO = #{order_no}
+				</if>
+				GROUP BY 
+					CHECK_ITEM
+				ORDER BY 
+					LCLAS_ORDER ASC, MLSFC_ORDER ASC, CHECK_ITEM_ORDER ASC
+			) C
+		) A
+	</select>
+	
+	<select id="mngLevelInsttEvlList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.INSTT_CD,
+			A.INSTT_NM,
+			A.INSTT_CL_CD,
+			B.INDEX_SEQ,
+			B.ORDER_NO,
+			B.LCLAS_ORDER,
+			CONCAT(B.LCLAS_ORDER, '.', B.MLSFC_ORDER) MLSFC_ORDER,
+			CONCAT(B.LCLAS_ORDER, '.', B.MLSFC_ORDER, '.', B.CHECK_ITEM_ORDER) CHECK_ITEM_ORDER,
+			C.STATUS,
+			C.ATCHMNFL_ID,
+      		C.RERGIST_REQUST_CN,
+      		C.RERGIST_REQUST_DE,
+      		C.EXCP_PERM_YN
+		FROM
+			INSTITUTION_MASTR A
+			LEFT JOIN MNG_LEVEL_IDX_MASTR B ON B.DELETE_YN = 'N'
+			LEFT JOIN MANAGE_LEVEL_REQST C ON B.INDEX_SEQ = C.MNG_LEVEL_IDX_SEQ AND A.INSTT_CD = C.INSTT_CD AND C.DELETE_YN = 'N'
+		<if test='user_id != null and user_id != ""'>
+			LEFT JOIN INSTT_INSCTR_MAP D ON A.INSTT_CD = D.INSTT_CD
+		</if>
+		WHERE
+			1=1
+				AND B.ORDER_NO = #{order_no}
+			<if test='user_id != null and user_id != ""'>
+				AND D.USER_ID = #{user_id}
+			</if> 
+	</select>
+	
+	<select id="selectMngLevelMastrList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			CONCAT(A.LCLAS_ORDER, '.', A.MLSFC_ORDER) mlsfcOrd,
+			CONCAT(A.LCLAS_ORDER, '.', A.MLSFC_ORDER, '.', A.CHECK_ITEM_ORDER) checkItemOrd,
+			A.INDEX_SEQ indexSeq,
+			A.ORDER_NO orderNo,
+			A.LCLAS lclas,
+			A.LCLAS_ORDER lclasOrder,
+      		B.lclasCnt,
+      		B.maxlclasCnt,
+			A.MLSFC mlsfc,
+			A.MLSFC_ORDER mlsfcOrder,
+      		C.mlsfcCnt,
+			A.CHECK_ITEM checkItem,
+			A.HELP_COMMENT helpComment,
+			A.REMARK remark,
+			A.RESULT_SE resultSe,
+			A.EXCP_PERM_YN excpPermYn,
+			A.REGIST_DT registDt,
+			A.REGIST_ID registId,
+			A.UPDT_DT updtDt,
+			A.UPDT_ID updtId,
+			A.DELETE_DT deleteDt,
+			A.DELETE_ID deleteId,
+			A.DELETE_YN deleteYn,
+			#{insttCd} insttCd, 
+			D.ATCHMNFL_ID atchmnflId,
+      		D.FILE_ID     fileId,
+      		D.FILE_NAME   fileName,
+      		D.STATUS      status,
+      		D.SAVE_FILE_NAME   saveFileName,
+      		D.FILE_PATH   filePath,
+      		D.RERGIST_REQUST_CN  requstCn,
+      		DATE_FORMAT(D.RERGIST_REQUST_DE, '%Y.%m.%d') requstDe,
+      		D.EXCP_PERM_YN  excpYn,
+      		SUBSTRING(D.FILE_EXTSN,1,3)    fileExtsn,
+      		D.MEMO memo,
+      		DATE_FORMAT(D.MEMO_REGIST_DT, '%Y.%m.%d %H:%i') memoRegistDt
+		FROM
+			MNG_LEVEL_IDX_MASTR A 
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, COUNT(*) lclasCnt, MAX(MLSFC_ORDER) maxlclasCnt
+		          FROM MNG_LEVEL_IDX_MASTR
+		          GROUP BY ORDER_NO, LCLAS
+		        ) B
+		        ON A.ORDER_NO = B.ORDER_NO AND A.LCLAS = B.LCLAS
+		        LEFT OUTER JOIN(
+		          SELECT ORDER_NO, LCLAS, MLSFC, COUNT(*) mlsfcCnt
+		          FROM MNG_LEVEL_IDX_MASTR
+		          GROUP BY ORDER_NO, LCLAS, MLSFC
+		        ) C
+		        ON A.ORDER_NO = C.ORDER_NO AND A.LCLAS = C.LCLAS AND A.MLSFC = C.MLSFC
+		        LEFT OUTER JOIN(
+		          SELECT Z.INSTT_CD, Z.ORDER_NO, Z.MNG_LEVEL_IDX_SEQ, Z.STATUS, Z.RERGIST_REQUST_CN, Z.RERGIST_REQUST_DE, Z.EXCP_PERM_YN, Y.ATCHMNFL_ID, Y.FILE_ID, Y.FILE_NAME, Y.FILE_EXTSN, Y.SAVE_FILE_NAME, Y.FILE_PATH, Y.REGIST_DT, Y.MEMO, Y.MEMO_REGIST_DT
+		          FROM MANAGE_LEVEL_REQST Z
+                		LEFT OUTER JOIN(
+                     		SELECT AA.ATCHMNFL_ID ATCHMNFL_ID,AA.REGIST_DT REGIST_DT ,BB.SAVE_FILE_NAME SAVE_FILE_NAME,BB.FILE_PATH FILE_PATH,BB.FILE_EXTSN FILE_EXTSN, BB.FILE_ID FILE_ID, BB.FILE_NAME FILE_NAME, BB.MEMO MEMO, BB.REGIST_DT MEMO_REGIST_DT
+		                	 FROM  ATTACHMENT_FILE_MAP AA, ATTACHMENT_FILE_MASTR BB
+                     		WHERE AA.FILE_ID = BB.FILE_ID
+                		) Y
+                		ON Z.ATCHMNFL_ID = Y.ATCHMNFL_ID 
+                   WHERE Z.INSTT_CD =#{insttCd}
+		        ) D
+		        ON A.ORDER_NO = D.ORDER_NO AND A.INDEX_SEQ = D.MNG_LEVEL_IDX_SEQ
+		WHERE
+			A.ORDER_NO = #{orderNo}
+			<if test='null != lclas and "" != lclas'>
+			AND A.LCLAS = #{lclas}
+			</if>
+		ORDER BY A.LCLAS_ORDER, A.MLSFC_ORDER, A.INDEX_SEQ, D.REGIST_DT
+	</select>
+	
+	<select id="selectLclasOrderCnt" resultType="int">
+		SELECT MAX(LCLAS_ORDER) + 1
+		FROM MNG_LEVEL_IDX_MASTR;
+	</select>
+
+	<select id="selectMngLevelIdxCnt" parameterType="zvl" resultType="int">
+		SELECT COUNT(*)
+		FROM MNG_LEVEL_IDX_MASTR
+		WHERE ORDER_NO =#{orderNo}		  
+		  AND DELETE_YN='N'
+	</select>
+
+	<select id="selectMngLevelReqstCnt" parameterType="zvl" resultType="int">
+		SELECT COUNT(*)
+		FROM MANAGE_LEVEL_REQST A, MNG_LEVEL_IDX_MASTR B
+		WHERE A.MNG_LEVEL_IDX_SEQ=B.INDEX_SEQ
+		  AND A.ORDER_NO=B.ORDER_NO
+		  AND A.INSTT_CD =#{insttCd}
+		  AND A.ORDER_NO =#{orderNo}		  
+		  <if test='null != mngLevelIdxSeq and "" != mngLevelIdxSeq'>
+		  AND A.MNG_LEVEL_IDX_SEQ=#{mngLevelIdxSeq}
+		  </if>
+	</select>
+
+	<select id="selectCntMngLevelReqstStatus" parameterType="zvl" resultType="zvl">
+		SELECT A.STATUS status, COUNT(*) cnt
+		FROM MANAGE_LEVEL_REQST A, MNG_LEVEL_IDX_MASTR B
+		WHERE  A.MNG_LEVEL_IDX_SEQ=B.INDEX_SEQ
+		  AND A.ORDER_NO=B.ORDER_NO
+		  AND A.INSTT_CD =#{insttCd}
+		  AND A.ORDER_NO =#{orderNo}
+		  <if test='null != mngLevelIdxSeq and "" != mngLevelIdxSeq'>
+		  AND A.MNG_LEVEL_IDX_SEQ=#{mngLevelIdxSeq}
+		  </if>
+		  <if test='null != reqStatus and "" != reqStatus'>
+		  AND A.STATUS=#{reqStatus}
+		  </if>
+		GROUP BY A.STATUS;
+	</select>
+
+	<select id="seleteMngLevelResFileCnt" parameterType="zvl"  resultType="int">
+		SELECT COUNT(*)
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnflId}
+	</select>
+	
+	<select id="selectMngLevelReqst" parameterType="zvl" resultType="zvl">
+		SELECT 
+			INSTT_CD,
+			ORDER_NO,
+			MNG_LEVEL_IDX_SEQ,
+			ATCHMNFL_ID,
+			STATUS,
+			RERGIST_REQUST_CN,
+			RERGIST_REQUST_DE,
+			EXCP_PERM_YN,
+			REGIST_DT,
+			REGIST_ID,
+			UPDT_DT,
+			UPDT_ID,
+			DELETE_YN
+		 FROM    MANAGE_LEVEL_REQST	  
+		WHERE	INSTT_CD		  = #{insttCd}
+		  AND   ORDER_NO          = #{orderNo}
+		  AND   MNG_LEVEL_IDX_SEQ = #{mngLevelIdxSeq};		  
+	</select>
+	
+	<insert id="insertMngLevelReqst" parameterType="zvl">
+		INSERT INTO MANAGE_LEVEL_REQST
+		(
+			INSTT_CD,
+			ORDER_NO,
+			MNG_LEVEL_IDX_SEQ,
+			ATCHMNFL_ID,
+			<if test='null != status and "" != status'>			
+			STATUS,
+			</if>
+			RERGIST_REQUST_CN,
+			RERGIST_REQUST_DE,
+			EXCP_PERM_YN,
+			REGIST_DT,
+			REGIST_ID,
+			UPDT_DT,
+			UPDT_ID,
+			DELETE_YN
+		)
+		VALUES
+		(
+			#{insttCd},
+			#{orderNo},
+			#{mngLevelIdxSeq},
+			#{atchmnfl_id},
+			<if test='null != status and "" != status'>			
+			#{status},
+			</if>
+			#{rergistRequstCn},
+			#{rergistRequstDe},
+			#{excpPermYn},
+			now(),
+			#{registId},
+			now(),
+			#{updtId},
+			'N'			
+		);
+
+		<if test="file_ids != null and file_ids.length > 0">
+			INSERT ATTACHMENT_FILE_MAP ( ATCHMNFL_ID, FILE_ID, TABLE_NM, TABLE_ID, REGIST_DT, REGIST_ID, DELETE_YN  )
+			SELECT  #{atchmnfl_id}, FILE_ID, 'MANAGE_LEVEL_REQST', LAST_INSERT_ID(), NOW(), #{registId}, 'N'
+			FROM    ATTACHMENT_FILE_MASTR
+			WHERE   FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+			AND		1=1;
+		</if>
+		
+	    <if test="memo != null and memo.length > 0">
+			UPDATE ATTACHMENT_FILE_MASTR 
+			SET	   MEMO		= #{memo}
+			WHERE  FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+					#{item}
+			</foreach>
+	    </if>				
+		
+	</insert>
+
+	<update id="updateMngLevelReqst" parameterType="zvl">
+		UPDATE	MANAGE_LEVEL_REQST
+		SET	ATCHMNFL_ID		= #{atchmnfl_id},
+			EXCP_PERM_YN    = #{excpPermYn},
+			<if test='null != status and "" != status'>			
+			STATUS          = #{status},
+			</if>
+			UPDT_DT			= NOW(),
+			UPDT_ID			= #{updtId} 
+		WHERE	INSTT_CD		  = #{insttCd}
+		  AND   ORDER_NO          = #{orderNo}
+		  AND   MNG_LEVEL_IDX_SEQ = #{mngLevelIdxSeq};		  
+		  
+		  <if test="file_ids != null and file_ids.length > 0">
+			INSERT ATTACHMENT_FILE_MAP ( ATCHMNFL_ID, FILE_ID, TABLE_NM, TABLE_ID, REGIST_DT, REGIST_ID, DELETE_YN  )
+			SELECT  #{atchmnfl_id}, FILE_ID, 'MANAGE_LEVEL_REQST', LAST_INSERT_ID(), NOW(), #{registId}, 'N'
+			FROM    ATTACHMENT_FILE_MASTR
+			WHERE   FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+			AND		1=1;
+			</if>
+			
+		  <if test="memo != null and memo.length > 0">
+			UPDATE ATTACHMENT_FILE_MASTR 
+			SET	   MEMO		= #{memo}
+			WHERE  FILE_ID IN 
+			<foreach collection="file_ids" item="item" open="(" close=")" separator = "," >
+ 				#{item}
+			</foreach>
+		  </if>			
+		  
+	</update>
+
+	<select id="mngLevelInsttFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.MNG_LEVEL_IDX_SEQ INDEX_SEQ,
+			C.FILE_ID,
+			C.FILE_NAME,
+			C.SAVE_FILE_NAME,
+			C.FILE_PATH,
+			SUBSTRING(C.FILE_EXTSN,1,3)    fileExtsn
+		FROM 
+			MANAGE_LEVEL_REQST A
+			JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+		WHERE 
+		1=1 
+			AND A.MNG_LEVEL_IDX_SEQ = #{mngLevelIdxSeq}
+			AND A.INSTT_CD = #{insttCd}
+			AND A.ORDER_NO = #{orderNo}
+	</select>
+
+	<delete id="deleteMngLevelReqst" parameterType="zvl">
+		DELETE
+		FROM
+			MANAGE_LEVEL_REQST
+		WHERE	INSTT_CD		  = #{insttCd}
+		  AND   ORDER_NO          = #{orderNo}
+		  AND   MNG_LEVEL_IDX_SEQ = #{mngLevelIdxSeq} 
+	</delete>
+	
+	<update id="updateMngLevelReqstAttachId" parameterType="zvl">
+		UPDATE MANAGE_LEVEL_REQST SET
+			ATCHMNFL_ID = NULL
+		WHERE	INSTT_CD = #{insttCd}
+		  AND   ORDER_NO = #{orderNo}
+		  AND   MNG_LEVEL_IDX_SEQ = #{mngLevelIdxSeq} 
+	</update>
+	
+	<delete id="deleteMngLevelResFile" parameterType="zvl">
+		DELETE
+		FROM
+			ATTACHMENT_FILE_MASTR
+		WHERE
+			FILE_ID = #{fileId}
+
+	</delete>
+	
+	<delete id="deleteMngLevelRes" parameterType="zvl">
+		DELETE
+		FROM
+			ATTACHMENT_FILE_MAP
+		WHERE
+			ATCHMNFL_ID = #{atchmnflId}
+		AND
+			FILE_ID = #{fileId}
+	</delete>
+
+	<update id="updateMngLevelReqstStat" parameterType="zvl">
+		UPDATE	MANAGE_LEVEL_REQST
+		SET	STATUS       	= #{status},
+			<if test='null != requstCn and "" != requstCn'>
+			RERGIST_REQUST_CN = #{requstCn},
+			</if>
+			<if test='null != requstDe and "" != requstDe'>
+			RERGIST_REQUST_DE = #{requstDe},
+			</if>
+			UPDT_DT			= NOW(),
+			UPDT_ID			= #{updtId} 
+		WHERE	INSTT_CD		  = #{insttCd}
+		  AND   ORDER_NO          = #{orderNo}
+		  <if test='null != mngLevelIdxSeq and "" != mngLevelIdxSeq'>
+		  AND   MNG_LEVEL_IDX_SEQ = #{mngLevelIdxSeq} 
+		  </if>
+		  <if test='null != preStatus and "" != preStatus'>
+		  AND (( STATUS != #{preStatus}  
+		  AND   STATUS != 'RS05'  
+		  AND   STATUS != 'RS06'
+		  ) OR
+		  STATUS IS NULL
+		  )
+		  </if>
+		;
+		<!-- 20180112 개인정보 담당자에게 자동으로 메시지 전달 로직 오류로 주석처리
+		INSERT INTO NOTIFICATION_MSSAGE
+		(
+			USER_ID,
+			SUBJECT,
+			CONTENTS,
+			RECPTN_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		VALUES
+		(
+			#{updtId},
+			'재등록 요청',
+			'재등록 요청이 있습니다. 관리수준 진단 실적등록을 확인하세요.',
+			'N',
+			now(),
+			#{updtId},
+			'N'
+		);
+		
+		INSERT INTO NOTIFICATION_MSSAGE_DETAIL
+		(
+		    SEQ,
+			USER_ID,
+			RECPTN_YN,
+			REGIST_DT,
+			REGIST_ID,
+			DELETE_YN
+		)
+		SELECT
+			LAST_INSERT_ID(),
+			USER_ID,
+			'N',
+			NOW(),
+			#{updtId},
+			'N'
+		FROM
+			USER_MASTR
+		WHERE
+			INSTT_CD = #{insttCd}
+		LIMIT
+			1
+		-->
+	</update>
+
+	<select id="selectBsisSttusCnt" parameterType="zvl" resultType="int">
+		SELECT IFNULL(SUM(A.CNT),0) FROM (
+			SELECT 1 CNT FROM BSIS_STTUS_CNSGN
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+			UNION ALL
+			SELECT 1 CNT FROM BSIS_STTUS_EDC
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+			UNION ALL
+			SELECT 1 CNT FROM BSIS_STTUS_FILE
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+			UNION ALL
+			SELECT 1 CNT FROM BSIS_STTUS_INSTITUTION
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+			UNION ALL
+			SELECT 1 CNT FROM BSIS_STTUS_INSTITUTION_USER
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+			UNION ALL
+			SELECT 1 CNT FROM BSIS_STTUS_SYS
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+			UNION ALL
+			SELECT 1 CNT FROM BSIS_STTUS_VIDEO
+			WHERE ORDER_NO =#{orderNo} AND INSTT_CD=#{insttCd} GROUP BY INSTT_CD
+		) A	
+	</select>
+	
+	<select id="getLimitFileSize" parameterType="zvl" resultType="zvl">
+		SELECT
+			IF
+			(
+				D.MAX_TOTAL_FILE_SIZE IS NOT NULL, 
+				D.MAX_TOTAL_FILE_SIZE - IFNULL(SUM(C.FILE_SIZE), 0),
+				1024*1024*1024 - IFNULL(SUM(C.FILE_SIZE), 0)
+			) maxTotFileSize,
+			IF
+			(
+				D.MAX_FILE_SIZE IS NOT NULL, 
+				IF
+				(
+					(D.MAX_TOTAL_FILE_SIZE - IFNULL(SUM(C.FILE_SIZE), 0)) <![CDATA[<]]> D.MAX_FILE_SIZE, 
+					D.MAX_TOTAL_FILE_SIZE - IFNULL(SUM(C.FILE_SIZE), 0), 
+					D.MAX_FILE_SIZE
+				), 
+				IF
+				(
+					(1024*1024*1024 - IFNULL(SUM(C.FILE_SIZE), 0)) <![CDATA[<]]> 1024*1024*50, 
+					1024*1024*1024 - IFNULL(SUM(C.FILE_SIZE), 0), 
+					1024*1024*50
+				)
+			) maxFileSize,
+	      	IFNULL(D.MAX_TOTAL_FILE_SIZE, 1024*1024*1024) maxTotFileSize1,
+	      	IFNULL(D.MAX_FILE_SIZE, 1024*1024*50) maxFileSize1
+		FROM
+			MANAGE_LEVEL_REQST A
+			LEFT JOIN ATTACHMENT_FILE_MAP B ON A.ATCHMNFL_ID = B.ATCHMNFL_ID
+			LEFT JOIN ATTACHMENT_FILE_MASTR C ON B.FILE_ID = C.FILE_ID
+			LEFT JOIN INSTITUTION_FILE_MASTR D ON A.INSTT_CD = D.INSTT_CD AND A.ORDER_NO = D.ORDER_NO
+		WHERE
+			1=1
+			AND A.INSTT_CD = #{insttCd}
+			AND A.ORDER_NO = #{orderNo}
+	</select>
+</mapper>

@@ -1,0 +1,19 @@
+.clearfix:before,.clearfix:after{content:"";display:table}
+.clearfix:after{clear:both}
+.clearfix{*zoom:1}
+.prettycheckbox,.prettyradio{display:inline-block;padding:0;margin:0}
+.prettycheckbox>a,.prettyradio>a{height:21px;width:21px;display:block;float:left;cursor:pointer;margin:0;background:url(../images/common/ico_common.png)}
+.prettycheckbox>a:focus,.prettyradio>a:focus{outline:0 none}.prettycheckbox label,.prettyradio label{display:block;float:left;margin:6px 5px;cursor:pointer}
+.prettycheckbox a.disabled,.prettycheckbox label.disabled,.prettyradio a.disabled,.prettyradio label.disabled{cursor:not-allowed}
+.prettycheckbox>a{background-position:0 0}
+.prettycheckbox>a:focus{background-position:-30px 0}
+.prettycheckbox>a.checked{background-position:-60px 0}
+.prettycheckbox>a.checked:focus{background-position:-90px 0}
+.prettycheckbox>a.checked.disabled{background-position:-150px 0}
+.prettycheckbox>a.disabled{background-position:-120px 0}
+.prettyradio>a{background-position:-303px -278px;}
+.prettyradio>a:focus{background-position: -331px -278px;}
+.prettyradio>a.checked{background-position:-360px -278px;}
+.prettyradio>a.checked:focus{background-position: -387px -278px;}
+.prettyradio>a.checked.disabled{background-position:-440px -278px;}
+.prettyradio>a.disabled{background-position:-414px -278px;}

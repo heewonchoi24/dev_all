@@ -1,0 +1,45 @@
+/*!
+ * FullCalendar v1.6.4 Print Stylesheet
+ * Docs & License: http://arshaw.com/fullcalendar/
+ * (c) 2013 Adam Shaw
+ */
+
+/*
+ * Include this stylesheet on your page to get a more printer-friendly calendar.
+ * When including this stylesheet, use the media='print' attribute of the <link> tag.
+ * Make sure to include this stylesheet IN ADDITION to the regular fullcalendar.css.
+ */
+
+
+ /* Events
+-----------------------------------------------------*/
+
+.fc-event {
+	background: #fff !important;
+	color: #000 !important;
+	}
+
+/* for vertical events */
+
+.fc-event-bg {
+	display: none !important;
+	}
+
+.fc-event .ui-resizable-handle {
+	display: none !important;
+	}
+
+.fc-header {
+	background-color: #57b7df;
+}
+
+.fc-header-title h2 { color: #fff; font-weight: 500; }
+.fc-header-title h2 b { font-weight: 700; }
+
+.fc-border-separate tr.fc-last th { background-color: #89cce9; }
+
+
+.fc-header .fc-button { height: 2.5em; }
+
+.fc-text-arrow { background: url(/dist/images/ico/cal_arrow_prev.png) no-repeat center; width: 29px; height: 29px; }
+.fn-text-arrow { background: url(/dist/images/ico/cal_arrow_next.png) no-repeat center; width: 29px; height: 29px; }

@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="stat">
+
+	<select id="bsisStatusFileList" parameterType="zvl" resultType="zvl">
+		SELECT
+			B.INSTT_NM colNm,
+			SUM(A.INDVDLINFO_CO) value
+		FROM 
+			BSIS_STTUS_FILE A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		GROUP BY
+			A.INSTT_CD
+	</select>
+	
+	<select id="bsisStatusCnsgnList" parameterType="zvl" resultType="zvl">
+		SELECT
+			B.INSTT_NM colNm,
+			COUNT(A.SEQ) value
+		FROM 
+			BSIS_STTUS_CNSGN A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		GROUP BY
+			A.INSTT_CD
+	</select>
+	
+	<select id="bsisStatusSysList" parameterType="zvl" resultType="zvl">
+		SELECT
+			B.INSTT_NM colNm,
+			COUNT(A.SEQ) value
+		FROM 
+			BSIS_STTUS_SYS A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		GROUP BY
+			A.INSTT_CD
+	</select>
+	
+	<select id="bsisStatusVideoList" parameterType="zvl" resultType="zvl">
+		SELECT
+			B.INSTT_NM colNm,
+			SUM(A.VIDEO_CO) value
+		FROM 
+			BSIS_STTUS_VIDEO A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.ORDER_NO = #{orderNo}
+		GROUP BY
+			A.INSTT_CD
+	</select>
+
+	<select id="bsisStatusInsttTotalList" parameterType="zvl" resultType="zvl">
+		SELECT
+			'S1' code, 
+			A.ORDER_NO colNm,
+			SUM(A.INDVDLINFO_CO) value
+		FROM 
+			BSIS_STTUS_FILE A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.INSTT_CD = #{insttCd}
+		GROUP BY
+			A.ORDER_NO
+		UNION ALL
+		SELECT
+			'S2' code,
+			A.ORDER_NO colNm,
+			COUNT(A.SEQ) value
+		FROM 
+			BSIS_STTUS_CNSGN A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.INSTT_CD = #{insttCd}
+		GROUP BY
+			A.ORDER_NO
+		UNION ALL
+		SELECT
+			'S3' code,
+			A.ORDER_NO colNm,
+			COUNT(A.SEQ) value
+		FROM 
+			BSIS_STTUS_SYS A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.INSTT_CD = #{insttCd}
+		GROUP BY
+			A.ORDER_NO
+		UNION ALL
+		SELECT
+			'S4' code,
+			A.ORDER_NO colNm,
+			SUM(A.VIDEO_CO) value
+		FROM 
+			BSIS_STTUS_VIDEO A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+		WHERE
+			A.INSTT_CD = #{insttCd}
+		GROUP BY
+			A.ORDER_NO
+	</select>
+	
+	<select id="insttStatManageLevelEvlList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			B.INSTT_NM colNm,
+			A.TOT_RESULT_SCORE2 value
+		FROM
+			MANAGE_LEVEL_GNRLZ_EVL A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+			LEFT JOIN ORDER_MASTR C ON A.ORDER_NO = C.ORDER_NO
+		WHERE
+			A.ORDER_NO = #{orderNo}
+			AND DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(C.MNG_LEVEL_RESULT_ENDDE, '%Y%m%d')
+	</select>
+	
+	<select id="insttStatStatusExaminList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			B.INSTT_NM colNm,
+			A.TOT_RESULT_SCORE2 value
+		FROM
+			STATUS_EXAMIN_GNRLZ_EVL A
+			LEFT JOIN INSTITUTION_MASTR B ON A.INSTT_CD = B.INSTT_CD
+			LEFT JOIN ORDER_MASTR C ON A.ORDER_NO = C.ORDER_NO
+		WHERE
+			A.ORDER_NO = #{orderNo}
+			AND DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(C.STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d')
+	</select>
+	
+	<select id="insttStatOrgEvlList" parameterType="zvl" resultType="zvl">
+		SELECT
+			colNm,
+			value1,
+			value2
+		FROM
+		(  
+			SELECT 
+				A.ORDER_NO colNm,
+				IF
+				(
+					DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(A.STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d'),
+					B.TOT_RESULT_SCORE2,
+					NULL
+				) value1 ,
+				IF
+				(
+					DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(A.STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d'),
+					C.TOT_RESULT_SCORE2,
+					NULL
+				) value2
+			FROM
+				ORDER_MASTR A
+				JOIN MANAGE_LEVEL_GNRLZ_EVL B ON A.ORDER_NO = B.ORDER_NO AND B.INSTT_CD = ${insttCd}
+				JOIN STATUS_EXAMIN_GNRLZ_EVL C ON A.ORDER_NO = C.ORDER_NO AND C.INSTT_CD = ${insttCd}
+		)A
+		WHERE
+			value1 IS NOT NULL 
+			AND value2 IS NOT NULL
+	</select>
+	
+	<select id="indexInstitutionMngStatList" parameterType="zvl" resultType="zvl">
+		SELECT
+        	  C.MLSFC	name
+			, ROUND(B.RESULT_TOT_PER2, 2) value 
+        	, A.INSTT_CD insttCd
+        	, A.INSTT_NM insttNm
+		FROM 
+			INSTITUTION_MASTR A 
+			LEFT JOIN MANAGE_LEVEL_EVL B ON A.INSTT_CD = B.INSTT_CD
+        	LEFT JOIN MNG_LEVEL_IDX_MASTR C ON B.INDEX_SEQ = C.INDEX_SEQ
+        	LEFT JOIN ORDER_MASTR D ON C.ORDER_NO = D.ORDER_NO
+		WHERE
+			C.ORDER_NO = #{orderNo}
+		AND
+			DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(D.MNG_LEVEL_RESULT_ENDDE, '%Y%m%d')
+      	AND
+			A.INSTT_CD = #{insttCd}
+		GROUP BY
+			C.MLSFC, A.INSTT_CD, A.INSTT_NM
+      ORDER BY C.INDEX_SEQ
+	</select>
+	
+	<select id="indexMngStatList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+		    AA.mlsfc name
+		  , ROUND(AVG(AA.resultTotPer2), 2) value
+		FROM
+		  (
+		    SELECT
+		          C.MLSFC mlsfc
+				, B.RESULT_TOT_PER2 resultTotPer2
+		        , A.INSTT_CD insttCd
+		        , A.INSTT_NM insttNm
+		        , @ROWNUM:=@ROWNUM+1 rowNum
+					FROM 
+						INSTITUTION_MASTR A 
+						LEFT JOIN MANAGE_LEVEL_EVL B ON A.INSTT_CD = B.INSTT_CD
+		        		LEFT JOIN MNG_LEVEL_IDX_MASTR C ON B.INDEX_SEQ = C.INDEX_SEQ
+        				LEFT JOIN ORDER_MASTR D ON C.ORDER_NO = D.ORDER_NO
+					WHERE
+						C.ORDER_NO = #{orderNo}
+					AND
+						DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(D.MNG_LEVEL_RESULT_ENDDE, '%Y%m%d')
+					<if test='insttClCd != null and insttClCd != ""'>
+					AND A.INSTT_CL_CD = #{insttClCd}
+					</if>
+					GROUP BY
+						C.MLSFC, A.INSTT_CD, A.INSTT_NM
+		      ORDER BY C.INDEX_SEQ
+		  ) AA
+		 GROUP BY AA.mlsfc
+		 ORDER BY AA.rowNum
+	</select>
+	
+	<select id="indexInstitutionStatusStatList" parameterType="zvl" resultType="zvl">
+		SELECT
+        	  C.SCLAS	name
+			, CASE 
+        		WHEN B.RESULT_SCORE2 >= 90 THEN 4
+        		WHEN B.RESULT_SCORE2 >= 80 THEN 3
+        		WHEN B.RESULT_SCORE2 >= 70 THEN 2
+        		ELSE '1'
+        	  END value
+        	, A.INSTT_CD insttCd
+        	, A.INSTT_NM insttNm
+		FROM 
+			INSTITUTION_MASTR A 
+			LEFT JOIN STATUS_EXAMIN_EVL B ON A.INSTT_CD = B.INSTT_CD
+        	LEFT JOIN STATUS_EXAMIN_IDX C ON B.INDEX_SEQ = C.INDEX_SEQ
+        	LEFT JOIN ORDER_MASTR D ON C.ORDER_NO = D.ORDER_NO
+		WHERE
+			C.ORDER_NO = #{orderNo}
+		AND
+			DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(D.STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d')
+      	AND
+			A.INSTT_CD = #{insttCd}
+		GROUP BY
+			C.SCLAS, A.INSTT_CD, A.INSTT_NM
+      ORDER BY C.INDEX_SEQ
+	</select>
+	
+	<select id="indexStatusStatList" parameterType="zvl" resultType="zvl">
+		SET @ROWNUM:=0;
+
+		SELECT
+		    AA.sclas name
+		  , ROUND(AVG(AA.resuntScore2), 2) value
+		FROM
+		  (
+		    SELECT
+		          C.SCLAS sclas
+				, B.RESULT_SCORE2 resuntScore2
+		        , A.INSTT_CD insttCd
+		        , A.INSTT_NM insttNm
+		        , @ROWNUM:=@ROWNUM+1 rowNum
+					FROM 
+						INSTITUTION_MASTR A 
+						LEFT JOIN STATUS_EXAMIN_EVL B ON A.INSTT_CD = B.INSTT_CD
+		        		LEFT JOIN STATUS_EXAMIN_IDX C ON B.INDEX_SEQ = C.INDEX_SEQ
+        				LEFT JOIN ORDER_MASTR D ON C.ORDER_NO = D.ORDER_NO
+					WHERE
+						C.ORDER_NO = #{orderNo}
+					AND
+						DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(D.STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d')
+					<if test='insttClCd != null and insttClCd != ""'>
+					AND A.INSTT_CL_CD = #{insttClCd}
+					</if>
+					GROUP BY
+						C.SCLAS, A.INSTT_CD, A.INSTT_NM
+		      ORDER BY C.INDEX_SEQ
+		  ) AA
+		 GROUP BY AA.sclas
+		 ORDER BY AA.rowNum
+	</select>
+	
+	<select id="conectHistDataList" parameterType="zvl" resultType="zvl">
+		SELECT 
+  			  DATE_FORMAT(REGIST_DT, '%Y.%m.%d') name
+  			, COUNT(*) value
+		FROM
+			CONECT_HIST
+		WHERE
+			CONECT_CD = 'HC02'
+		<if test='(fromDt == null or fromDt == "") and (endDt == null or endDt == "")'>
+		<![CDATA[
+		AND TO_DAYS(NOW()) - TO_DAYS(REGIST_DT) <= 10
+		]]>
+		</if>
+		<if test='fromDt != null and fromDt != ""'>
+			AND DATE_FORMAT(REGIST_DT, '%Y%m%d') >= DATE_FORMAT(#{fromDt}, '%Y%m%d')
+		</if>
+		<if test='endDt != null and endDt != ""'>
+			AND DATE_FORMAT(#{endDt}, '%Y%m%d') >= DATE_FORMAT(REGIST_DT, '%Y%m%d') 
+		</if>
+		GROUP BY
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d')
+		ORDER BY
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d')
+	</select>
+</mapper>

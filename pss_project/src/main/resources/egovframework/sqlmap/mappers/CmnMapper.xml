@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cmn">
+	<select id="commonCode" parameterType="zvl" resultType="zvl">
+		SELECT 
+			CODE,
+			CODE_NM,
+			OUTPUT_ORDR
+		FROM 
+			CMMN_CD_MASTR
+		<where>
+			USE_YN = 'Y'
+			<if test='uppercode != null or uppercode != ""'>
+				AND UPPER_CD = #{uppercode}
+			</if>
+		</where>
+	</select>
+	
+	<select id="instCode" resultType="zvl">
+		SELECT 
+			INSTT_CD,
+			INSTT_NM,
+			INSTT_CL_CD,
+			OUTPUT_ORDR
+		FROM 
+			INSTITUTION_MASTR
+		WHERE
+			DELETE_YN = 'N'
+		ORDER BY OUTPUT_ORDR
+	</select>
+	
+	<select id="menuList" parameterType="String" resultType="zvl">
+		SELECT
+			  menu.MENU_ID
+			, menu.MENU_NM
+			, menu.DESCRIPTION
+			, menu.URL
+			, menu.OUTPUT_ORDR
+			, menu.UPPER_MENU_ID
+			, menu.INDICT_YN
+			, menu.INDICT_TITLE_YN
+			, menu.displayLevel LEVEL
+			, menu.depth1st
+			, menu.depth2nd
+			, menu.depth3rd
+			, menu.orders
+			, menu.AUTH_READ authRead
+			, menu.AUTH_WRITE authWrite
+			, menu.AUTH_DOWNLOAD authDwn			
+		FROM
+		(
+			SELECT
+				  a.MENU_ID
+				, a.MENU_NM
+				, a.DESCRIPTION
+				, a.URL
+				, a.OUTPUT_ORDR
+				, a.UPPER_MENU_ID
+				, a.INDICT_YN
+				, a.INDICT_TITLE_YN
+				, a.REGIST_DT
+				, a.REGIST_ID
+				, a.UPDT_DT
+				, a.UPDT_ID
+				, a.DELETE_DT
+				, a.DELETE_ID
+				, a.DELETE_YN
+        		, D.AUTHOR_ID
+				, IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,3,2),1) AS displayLevel
+				, IF(A.UPPER_MENU_ID,	IF(B.UPPER_MENU_ID,C.OUTPUT_ORDR,B.OUTPUT_ORDR) 	,A.OUTPUT_ORDR  ) AS depth1st
+				, IF(A.UPPER_MENU_ID,	IF(B.UPPER_MENU_ID,B.OUTPUT_ORDR,A.OUTPUT_ORDR) 	,0              ) AS depth2nd
+				, IF(A.UPPER_MENU_ID,	IF(B.UPPER_MENU_ID,A.OUTPUT_ORDR,0) 				,0              ) AS depth3rd
+				, CONCAT(IF(A.UPPER_MENU_ID,	IF(B.UPPER_MENU_ID,C.OUTPUT_ORDR,B.OUTPUT_ORDR) 	,A.OUTPUT_ORDR )
+				, IF(IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,B.OUTPUT_ORDR,A.OUTPUT_ORDR),0)>9
+				, IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,B.OUTPUT_ORDR,A.OUTPUT_ORDR),0)
+				, CONCAT('0',IF(A.UPPER_MENU_ID,	IF(B.UPPER_MENU_ID,B.OUTPUT_ORDR,A.OUTPUT_ORDR),0 )))
+				, IF(IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,A.OUTPUT_ORDR,0),0)>9
+				, IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,A.OUTPUT_ORDR,0),0)
+				, CONCAT('0',IF(A.UPPER_MENU_ID,	IF(B.UPPER_MENU_ID,A.OUTPUT_ORDR,0),0)))  ) AS orders
+				, D.AUTH_READ
+				, D.AUTH_WRITE
+				, D.AUTH_DOWNLOAD				
+			FROM MENU_MASTR A
+				LEFT OUTER JOIN (
+					SELECT MENU_ID,UPPER_MENU_ID,OUTPUT_ORDR 
+					FROM MENU_MASTR
+					WHERE DELETE_YN = 'N'
+					AND INDICT_YN = 'Y'
+				) B ON A.UPPER_MENU_ID = B.MENU_ID
+				LEFT OUTER JOIN(
+					SELECT MENU_ID,UPPER_MENU_ID,OUTPUT_ORDR
+					FROM MENU_MASTR
+					WHERE DELETE_YN = 'N'
+					AND INDICT_YN = 'Y'
+				) C ON B.UPPER_MENU_ID = C.MENU_ID
+				JOIN AUTHOR_MENU_MAP D ON A.MENU_ID = D.MENU_ID
+			WHERE A.DELETE_YN = 'N'
+				AND A.INDICT_YN = 'Y'
+		) as menu
+	    WHERE
+			menu.AUTHOR_ID = #{author_id}
+	    ORDER BY menu.orders ASC
+	</select>
+	
+	<select id="currentOrderNo" resultType="zvl">
+		SELECT 
+			ORDER_NO as orderNo
+			, YEAR  as year
+			, MNG_LEVEL_REGIST_BGNDE as mngLevelRegistBgnde
+			, MNG_LEVEL_REGIST_ENDDE as mngLevelRegistEndde
+			, MNG_LEVEL_REGIST_BGNDE2 as mngLevelRegistBgnde2
+			, MNG_LEVEL_REGIST_ENDDE2 as mngLevelRegistEndde2
+			, MNG_LEVEL_EVL_BGNDE as mngLevelEvlBgnde
+			, MNG_LEVEL_EVL_ENDDE as mngLevelEvlEndde
+			, MNG_LEVEL_FOBJCT_BGNDE as mngLevelFobjctBgnde
+			, MNG_LEVEL_FOBJCT_ENDDE as mngLevelFobjctEndde
+			, MNG_LEVEL_RESULT_BGNDE as mngLevelResultBgnde
+			, MNG_LEVEL_RESULT_ENDDE as mngLevelResultEndde
+			, STTUS_EXAMIN_REGIST_BGNDE as sttusExaminRegistBgnde
+			, STTUS_EXAMIN_REGIST_ENDDE as sttusExaminRegistEndde
+			, STTUS_EXAMIN_FOBJCT_BGNDE as sttusExaminFobjctBgnde
+			, STTUS_EXAMIN_FOBJCT_ENDDE as sttusExaminFobjctEndde
+			, STTUS_EXAMIN_RESULT_BGNDE as sttusExaminResultBgnde
+			, STTUS_EXAMIN_RESULT_ENDDE as sttusExaminResultEndde
+			, CHECK_ITEM_SCORE_FRMLA as checkItemScoreFrmla
+			, REGIST_DT as registDt
+			, REGIST_ID as registId
+			, UPDT_DT as updtDt
+			, UPDT_ID as updtId
+			, CURRENT_YN AS currentYn
+		FROM 
+			ORDER_MASTR
+		WHERE 1=1
+			<!-- DATE_FORMAT(NOW() ,"%Y") = YEAR -->
+			AND CURRENT_YN = 'Y'
+	</select>
+	
+	<select id="maxOrderNo" resultType="zvl">
+		SELECT 
+			MAX(ORDER_NO) as orderNo
+		FROM 
+			ORDER_MASTR
+	</select>	
+	
+	<select id="orderNoList" resultType="zvl">
+		SELECT 
+			ORDER_NO as orderNo
+			, YEAR  as year
+			, MNG_LEVEL_REGIST_BGNDE as mngLevelRegistBgnde
+			, MNG_LEVEL_REGIST_ENDDE as mngLevelRegistEndde
+			, MNG_LEVEL_EVL_BGNDE as mngLevelEvlBgnde
+			, MNG_LEVEL_EVL_ENDDE as mngLevelEvlEndde
+			, MNG_LEVEL_FOBJCT_BGNDE as mngLevelFobjctBgnde
+			, MNG_LEVEL_FOBJCT_ENDDE as mngLevelFobjctEndde
+			, MNG_LEVEL_RESULT_BGNDE as mngLevelResultBgnde
+			, MNG_LEVEL_RESULT_ENDDE as mngLevelResultEndde
+			, STTUS_EXAMIN_REGIST_BGNDE as sttusExaminRegistBgnde
+			, STTUS_EXAMIN_REGIST_ENDDE as sttusExaminRegistEndde
+			, STTUS_EXAMIN_FOBJCT_BGNDE as sttusExaminFobjctBgnde
+			, STTUS_EXAMIN_FOBJCT_ENDDE as sttusExaminFobjctEndde
+			, STTUS_EXAMIN_RESULT_BGNDE as sttusExaminResultBgnde
+			, STTUS_EXAMIN_RESULT_ENDDE as sttusExaminResultEndde
+			, CHECK_ITEM_SCORE_FRMLA as checkItemScoreFrmla
+			, REGIST_DT as registDt
+			, REGIST_ID as registId
+			, UPDT_DT as updtDt
+			, UPDT_ID as updtId
+			, CURRENT_YN AS currentYn
+		FROM 
+			ORDER_MASTR
+	</select>
+	
+	<select id="evalFromTo" parameterType="zvl" resultType="zvl">
+		SELECT 
+			  IF(DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(MNG_LEVEL_EVL_ENDDE, '%Y%m%d'), 'Y', 'N') mngLevelYn
+			, IF(DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(STTUS_EXAMIN_REGIST_ENDDE, '%Y%m%d'), 'Y', 'N') sttusExaminYn
+      		, IF(DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(MNG_LEVEL_RESULT_ENDDE, '%Y%m%d'), 'Y', 'N') mngLevelFinYn
+      		, IF(DATE_FORMAT(NOW(), '%Y%m%d') > DATE_FORMAT(STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d'), 'Y', 'N') sttusExaminFinYn
+		FROM 
+			ORDER_MASTR
+		WHERE
+			ORDER_NO = #{orderNo}
+	</select>
+	
+	<select id="checkItemScoreSeList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			  A.ORDER_NO as orderNo
+			, A.SCORE_SE  as scoreSe
+			, A.SCORE_SE_NM as scoreSeNm
+			, A.SCORE_SE_DC as scoreSeDc
+			, A.SCORE as score
+			, A.OUTPUT_ORDR as outputOrdr
+			, A.MNG_LEVEL_CD as mngLevelCd
+			, A.REGIST_DT as registDt
+			, A.REGIST_ID as registId
+			, A.UPDT_DT as updtDt
+			, A.UPDT_ID as updtId
+		FROM 
+			CHECK_ITEM_SCORE_SE A, CMMN_CD_MASTR B
+		WHERE
+			B.UPPER_CD = #{mngLevelUpperCd}
+		AND
+			A.MNG_LEVEL_CD = B.CODE
+		AND
+			A.MNG_LEVEL_CD = #{mngLevelCd}
+		AND
+			A.ORDER_NO = #{orderNo}
+		ORDER BY A.OUTPUT_ORDR
+	</select>
+	
+	<select id="checkItemSctnScoreList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			  A.ORDER_NO as orderNo
+			, A.SCTN_SCORE  as sctnScore
+			, A.SCTN_NM as sctnNm
+			, A.MNG_LEVEL_CD as mngLevelCd
+			, A.REGIST_DT as registDt
+			, A.REGIST_ID as registId
+			, A.UPDT_DT as updtDt
+			, A.UPDT_ID as updtId
+		FROM 
+			CHECK_ITEM_SCTN_SCORE A, CMMN_CD_MASTR B
+		WHERE
+			B.UPPER_CD = #{mngLevelUpperCd}
+		AND
+			A.MNG_LEVEL_CD = B.CODE
+		AND
+			A.MNG_LEVEL_CD = #{mngLevelCd}
+		ORDER BY A.SCTN_SCORE DESC
+	</select>
+	
+	<select id="retrieveEvlPeriodCode" resultType="String">
+		SELECT 
+			CONCAT
+			(
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(MNG_LEVEL_REGIST_BGNDE, '%Y%m%d') AND DATE_FORMAT(MNG_LEVEL_REGIST_ENDDE, '%Y%m%d'), 'A', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(MNG_LEVEL_REGIST_BGNDE2, '%Y%m%d') AND DATE_FORMAT(MNG_LEVEL_REGIST_ENDDE2, '%Y%m%d'), 'H', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(MNG_LEVEL_EVL_BGNDE, '%Y%m%d')    AND DATE_FORMAT(MNG_LEVEL_EVL_ENDDE, '%Y%m%d'), 'B', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(MNG_LEVEL_FOBJCT_BGNDE, '%Y%m%d') AND DATE_FORMAT(MNG_LEVEL_FOBJCT_ENDDE, '%Y%m%d'), 'C', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(MNG_LEVEL_RESULT_BGNDE, '%Y%m%d') AND DATE_FORMAT(MNG_LEVEL_RESULT_ENDDE, '%Y%m%d'), 'D', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(STTUS_EXAMIN_REGIST_BGNDE, '%Y%m%d') AND DATE_FORMAT(STTUS_EXAMIN_REGIST_ENDDE, '%Y%m%d'), 'E', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(STTUS_EXAMIN_FOBJCT_BGNDE, '%Y%m%d') AND DATE_FORMAT(STTUS_EXAMIN_FOBJCT_ENDDE, '%Y%m%d'), 'F', ''),
+				IF(DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(STTUS_EXAMIN_RESULT_BGNDE, '%Y%m%d') AND DATE_FORMAT(STTUS_EXAMIN_RESULT_ENDDE, '%Y%m%d'), 'G', '') 
+			)periodCode
+		FROM ORDER_MASTR
+		WHERE
+			CURRENT_YN = 'Y'
+			<!-- DATE_FORMAT(NOW() ,"%Y") = YEAR -->
+	</select>
+	
+	<select id="mainBbsNoticeList" parameterType="zvl" resultType="zvl">
+		SELECT
+			SEQ,
+			BBS_CD,
+			CATEGORY,
+			SUBJECT,
+			HEAD_CATEGORY_TEXT,
+			CONTENTS,
+			ATCHMNFL_ID,
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d') REGIST_DT,
+			DATE_FORMAT(REGIST_DT, '%Y.%m') REGIST_YM,
+			DATE_FORMAT(REGIST_DT, '%d') REGIST_DD,
+			IF(DATEDIFF(NOW(), REGIST_DT) <![CDATA[ <= ]]> 20, 'Y', 'N') ISNEW,
+			(
+				SELECT COUNT(DISTINCT C.FILE_NAME) 
+				FROM ATTACHMENT_FILE_MAP B, ATTACHMENT_FILE_MASTR C 
+				WHERE B.ATCHMNFL_ID = A.ATCHMNFL_ID 
+				AND B.FILE_ID = C.FILE_ID
+			) FILE_COUNT
+		FROM
+			GNRL_BBS A
+		WHERE 
+			BBS_CD = 'BN01'
+			AND DELETE_YN = 'N'
+			AND (SUBJECT != '' AND SUBJECT IS NOT NULL)
+		ORDER BY 
+			SEQ DESC
+		LIMIT 4
+	</select>
+	
+	<select id="mainBbsResourceList" parameterType="zvl" resultType="zvl">
+		SELECT
+			SEQ,
+			BBS_CD,
+			SUBJECT,
+			(SELECT C.CODE_NM FROM CMMN_CD_MASTR C WHERE CODE=A.CATEGORY) CATEGORY,
+			CONTENTS,
+			IMG_NM,
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d') REGIST_DT,
+			DATE_FORMAT(REGIST_DT, '%Y.%m') REGIST_YM,
+			DATE_FORMAT(REGIST_DT, '%d') REGIST_DD,
+			IF(DATEDIFF(NOW(), REGIST_DT) <![CDATA[ <= ]]> 20, 'Y', 'N') ISNEW
+		FROM
+			GNRL_BBS A
+		WHERE 
+			BBS_CD = 'BN04'
+			AND DELETE_YN = 'N'
+			AND (SUBJECT != '' AND SUBJECT IS NOT NULL)
+		ORDER BY 
+			SEQ DESC
+		LIMIT 2
+	</select>
+	
+	<select id="mainBbsIndvdlLawList" parameterType="zvl" resultType="zvl">
+		SELECT
+			SEQ,
+			BBS_CD,
+			SUBJECT,
+			CONTENTS,
+			SOURCE,
+			DATE_FORMAT(REGIST_DT, '%Y.%m.%d') REGIST_DT,
+			DATE_FORMAT(REGIST_DT, '%Y.%m') REGIST_YM,
+			DATE_FORMAT(REGIST_DT, '%d') REGIST_DD,
+			IF(DATEDIFF(NOW(), REGIST_DT) <![CDATA[ <= ]]> 20, 'Y', 'N') ISNEW
+		FROM
+			GNRL_BBS
+		WHERE 
+			BBS_CD IN ('BN05', 'BN07')
+			AND DELETE_YN = 'N'
+			AND (SUBJECT != '' AND SUBJECT IS NOT NULL)
+		ORDER BY 
+			SEQ DESC
+		LIMIT 4
+	</select>
+	
+	<select id="mainYearSchedule" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.*,
+			(select count(*) from fyer_schdul where CONCAT(YYYY,MM) = A.PRE_YM OR A.PRE_YM BETWEEN SUBSTR(MNG_LEVEL_BGNDE,1,6) AND SUBSTR(MNG_LEVEL_ENDDE,1,6)) PRE_YM_SCHDUL_CNT,
+			(select count(*) from fyer_schdul where CONCAT(YYYY,MM) = A.NEXT_YM OR A.NEXT_YM BETWEEN SUBSTR(MNG_LEVEL_BGNDE,1,6) AND SUBSTR(MNG_LEVEL_ENDDE,1,6)) NEXT_YM_SCHDUL_CNT
+		FROM
+		(
+			SELECT
+				MNG_LEVEL_CD,
+				YYYY,
+				#{yyyyMM} CUR_YYYYMM,
+				SUBSTR(#{yyyyMM},1,4) CUR_YYYY,
+				SUBSTR(#{yyyyMM},5,6) CUR_MM,
+				CASE MNG_LEVEL_CD
+					WHEN 'ML03' THEN CONCAT(YYYY, '.', MM, '.', '01')
+					ELSE DATE_FORMAT(STR_TO_DATE(MNG_LEVEL_BGNDE, '%Y-%m-%d %H:%i:%s'), '%Y.%m.%d %H:%i')
+				END MNG_LEVEL_BGNDE,
+				CASE MNG_LEVEL_CD
+					WHEN 'ML03' THEN DATE_FORMAT(LAST_DAY(STR_TO_DATE(CONCAT(YYYY, MM, '01'), '%Y%m%d')), '%Y.%m.%d')
+					ELSE DATE_FORMAT(STR_TO_DATE(MNG_LEVEL_ENDDE, '%Y-%m-%d %H:%i:%s'), '%Y.%m.%d %H:%i')
+				END MNG_LEVEL_ENDDE,
+				DATE_FORMAT(STR_TO_DATE(CONCAT(#{yyyyMM}, '01'), '%Y%m%d') + INTERVAL 1 MONTH, '%Y%m') NEXT_YM,
+				DATE_FORMAT(STR_TO_DATE(CONCAT(#{yyyyMM}, '01'), '%Y%m%d') - INTERVAL 1 MONTH, '%Y%m') PRE_YM,
+				MNG_LEVEL_TITLE,
+				LINK
+			FROM
+				FYER_SCHDUL A
+				LEFT JOIN CMMN_CD_MASTR B ON A.MNG_LEVEL_CD = B.CODE AND B.UPPER_CD = 'ML00'
+			WHERE
+				1=1
+				AND 
+				(
+					CASE MNG_LEVEL_CD	
+						WHEN 'ML03' THEN CONCAT(YYYY,MM) = #{yyyyMM}
+						ELSE #{yyyyMM} BETWEEN SUBSTR(DATE_FORMAT(STR_TO_DATE(MNG_LEVEL_BGNDE, '%Y-%m-%d %H:%i:%s'), '%Y%m'),1,6) 
+								AND SUBSTR(DATE_FORMAT(STR_TO_DATE(MNG_LEVEL_ENDDE, '%Y-%m-%d %H:%i:%s'), '%Y%m'),1,6)	
+					END
+				)
+		)A
+	</select>
+	
+	<select id="mainYearScheduleDtlList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.MNG_LEVEL_CD mngLevelCd
+			, CASE MNG_LEVEL_CD
+				WHEN 'ML03' THEN CONCAT(A.YYYY, '.', A.MM, '.', '01')
+				ELSE DATE_FORMAT(STR_TO_DATE(A.MNG_LEVEL_BGNDE, '%Y%m%d'), '%Y.%m.%d')
+			  END mngLevelBgnde
+			, CASE A.MNG_LEVEL_CD
+				WHEN 'ML03' THEN DATE_FORMAT(LAST_DAY(STR_TO_DATE(CONCAT(A.YYYY, A.MM, '01'), '%Y%m%d')), '%Y.%m.%d')
+				ELSE DATE_FORMAT(STR_TO_DATE(A.MNG_LEVEL_ENDDE, '%Y%m%d'), '%Y.%m.%d')
+			  END mngLevelEndde
+  			, A.MNG_LEVEL_TITLE mngLevelTitle
+			, A.MNG_LEVEL_CN mngLevelCn
+		FROM
+			FYER_SCHDUL A
+			LEFT JOIN CMMN_CD_MASTR B
+			ON A.MNG_LEVEL_CD = B.CODE
+			AND B.UPPER_CD = 'ML00'
+		WHERE
+			A.MNG_LEVEL_CD = #{mngLevelCd}
+		AND
+			A.YYYY = #{yyyy} 
+	</select>
+	
+	<select id="recptnMsgListCnt" parameterType="zvl" resultType="zvl">
+		SELECT 
+			COUNT(*) msgCnt
+		FROM 
+			NOTIFICATION_MSSAGE AS X, 
+			NOTIFICATION_MSSAGE_DETAIL Y 
+		WHERE 
+			Y.DELETE_YN = 'N'
+			AND (Y.RECPTN_YN IS NULL OR Y.RECPTN_YN <![CDATA[<>]]> 'Y')
+			AND X.SEQ = Y.SEQ 
+			AND Y.USER_ID = #{user_id}
+		ORDER BY 
+			Y.SEQ DESC
+	</select>
+	
+	<select id="recptnMsgList" parameterType="zvl" resultType="zvl">
+		SELECT 
+			X.SEQ AS SEQ, 
+			CASE WHEN CHAR_LENGTH(X.SUBJECT) > 20
+				THEN CONCAT(LEFT(X.SUBJECT, 20), '...')
+				ELSE X.SUBJECT
+			END AS SUBJECT, 
+			CASE WHEN CHAR_LENGTH(X.CONTENTS) > 20
+				THEN CONCAT(LEFT(X.CONTENTS, 20), '...')
+				ELSE X.CONTENTS
+			END AS CONTENTS, 
+			CONCAT(
+				DATE_FORMAT(Y.REGIST_DT, '%Y.%m.%d'), 
+				CASE DATE_FORMAT(Y.REGIST_DT, '%w')
+					WHEN '0' THEN '(일)'
+					WHEN '1' THEN '(월)'
+					WHEN '2' THEN '(화)'
+					WHEN '3' THEN '(수)'
+					WHEN '4' THEN '(목)'
+					WHEN '5' THEN '(금)'
+					WHEN '6' THEN '(토)' 
+				END
+				) AS REGIST_DT
+		FROM 
+			NOTIFICATION_MSSAGE AS X, 
+			NOTIFICATION_MSSAGE_DETAIL Y 
+		WHERE 
+			Y.DELETE_YN = 'N'
+			AND (Y.RECPTN_YN IS NULL OR Y.RECPTN_YN <![CDATA[<>]]> 'Y')
+			AND X.SEQ = Y.SEQ 
+			AND Y.USER_ID = #{user_id}
+		ORDER BY 
+			Y.SEQ DESC
+	</select>
+	
+	<select id="certLoginSerialValidate" parameterType="zvl" resultType="int">
+		SELECT
+			COUNT(USER_ID)
+		FROM
+			USER_MASTR
+		WHERE 
+			OGCR = #{ogcr}
+	</select>
+	
+	<select id="selectAuthorList" parameterType="zvl" resultType="zvl">
+		SELECT
+			  A.AUTHOR_ID authorId
+			, A.AUTHOR_NM authorNm
+			, A.DESCRIPTION description
+			, A.REGIST_DT registDt
+			, A.REGIST_ID registId
+			, A.UPDT_DT updtDt
+			, A.UPDT_ID updtId
+			, A.DELETE_DT deleteDt
+			, A.DELETE_ID deleteId
+			, A.DELETE_YN deleteYn
+		FROM
+			AUTHORITY_MASTR A
+		WHERE
+			A.DELETE_YN = 'N'
+	</select>
+	
+	<select id="getMenuId" parameterType="zvl" resultType="zvl">
+		SELECT
+			A.MENU_ID menuId
+		FROM
+		(
+			SELECT
+				A.URL,
+				A.MENU_ID,
+				IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,3,2),1) AS LEVEL
+			FROM 
+				MENU_MASTR A
+				LEFT OUTER JOIN (
+					SELECT MENU_ID,UPPER_MENU_ID
+					FROM MENU_MASTR
+				) B ON A.UPPER_MENU_ID = B.MENU_ID
+		)A
+		WHERE
+			A.URL = #{url}
+			AND A.LEVEL =
+		(
+			SELECT
+				MAX(IF(A.UPPER_MENU_ID,IF(B.UPPER_MENU_ID,3,2),1)) AS LEVEL
+			FROM
+				MENU_MASTR A
+				LEFT OUTER JOIN (
+					SELECT MENU_ID,UPPER_MENU_ID
+					FROM MENU_MASTR
+				) B ON A.UPPER_MENU_ID = B.MENU_ID
+			WHERE
+				A.URL = #{url}
+		)
+	</select>
+
+	<select id="getQestnrSeq" parameterType="zvl" resultType="zvl">
+		SELECT
+			X.QESTNAR_SEQ   AS qestnarSeq,
+			X.QUSTNR_SJ		AS qustnrSj
+		FROM
+			QESTNAR_MASTR	AS X
+		WHERE DATE_FORMAT(NOW(), '%Y%m%d') BETWEEN DATE_FORMAT(BEGIN_DT, '%Y%m%d') AND DATE_FORMAT(END_DT, '%Y%m%d')	
+        AND #{user_id} NOT IN (SELECT A.USER_ID 
+                               FROM   QESTNAR_RESULT A,QESTNAR_ITEM B
+                               WHERE  A.QESITM_SEQ=B.QESITM_SEQ 
+                               AND    B.QESTNAR_SEQ=X.QESTNAR_SEQ)	
+   </select>	
+   
+   <select id="selectAuthority" parameterType="zvl" resultType="zvl">
+   	    SELECT 
+   	    	AUTH_READ authRead,
+   	    	AUTH_WRITE authWrite,
+   	    	AUTH_DOWNLOAD authDwn
+   	     FROM AUTHOR_MENU_MAP 
+   	    WHERE AUTHOR_ID = #{authorId} 
+   	      AND MENU_ID   = #{menuId}
+   </select>
+</mapper>
