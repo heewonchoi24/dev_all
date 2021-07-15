@@ -1,0 +1,27 @@
+.modal-3d{
+    width: 500px;
+    height: 350px;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.modal-video{
+    height: 350px;
+    margin: auto;
+    margin-bottom: 20px;
+}
+
+.modal-img{
+    height: 350px;
+    display: block;
+    margin: 0px 0px 20px 0px;
+}
+
+.modal{
+    overflow: visible;
+}
+
+audio{
+    margin: auto 0;
+    height: 40px;
+}
